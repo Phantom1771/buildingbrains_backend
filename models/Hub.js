@@ -3,7 +3,10 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 const hubSchema = new mongoose.Schema({
-  hubId: { type: String, unique: true },
+  hubCode: { type: String, unique: true },
+  address: String
   users: [String],
   devices: [String],
+  groups: [String],
+  automations: [String]
 }, { timestamps: true });

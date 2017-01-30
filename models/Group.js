@@ -3,9 +3,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 const deviceSchema = new mongoose.Schema({
-  address: String,
+  devices: [String],
   hub: String,
-  groups: [String],
-  status: String,
-  deviceType: String
-}, { timestamps: true });
+  type: String
+});

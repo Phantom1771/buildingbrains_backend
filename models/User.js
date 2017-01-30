@@ -10,15 +10,8 @@ const userSchema = new mongoose.Schema({
 
   hubs: [String],
 
-  facebook: String,
+  facebook: String
 
-  profile: {
-    name: String,
-    gender: String,
-    location: String,
-    website: String,
-    picture: String
-  }
 }, { timestamps: true });
 
 /**
