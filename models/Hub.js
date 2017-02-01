@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const hubSchema = new mongoose.Schema({
   hubCode: { type: String, unique: true },
-  address: String
+  address: String,
   users: [String],
   devices: [String],
   groups: [String],
