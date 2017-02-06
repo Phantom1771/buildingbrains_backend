@@ -3,7 +3,10 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 const deviceSchema = new mongoose.Schema({
-  devices: [String],
+  devices: [{type: Schema.Types.ObjectID, ref: 'Device'}],
   hub: String,
   type: String
 });
+
+const Group = mongoose.model('Group', groupSchema);
+module.exports = Group;
