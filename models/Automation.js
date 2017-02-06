@@ -9,5 +9,5 @@ const automationSchema = new mongoose.Schema({
   }]
 });
 
-const Automation = mongoose.model('Automation', userSchema);
+const Automation = mongoose.model('Automation', automationSchema);
 module.exports = Automation;
