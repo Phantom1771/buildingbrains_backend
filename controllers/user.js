@@ -54,7 +54,7 @@ exports.postSignup = (req, res) => {
 };
 
 /* #2
- * POST /login
+ * POST /users/login
  * Sign in using email and password.
  * JSON Req: { email:"xxx@xxx", password:"xxx"} 
  * JSON Res: { result: 0/1, error:"xxx", userToken: "xxx"} 
