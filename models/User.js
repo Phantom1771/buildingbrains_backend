@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
   passwordResetToken: String,
   passwordResetExpires: Date,
 
-  hubs: [String],
+
+  hubs: [{type: mongoose.Schema.Types.ObjectID, ref: 'Hub'}],
 
   facebook: String
 
@@ -56,5 +57,4 @@ userSchema.methods.gravatar = function gravatar(size) {
 };
 
 const User = mongoose.model('User', userSchema);
-
 module.exports = User;

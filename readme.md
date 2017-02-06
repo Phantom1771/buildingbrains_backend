@@ -69,11 +69,8 @@
 >> JSON req: {userToken: "xxx"}<br/>
 >> JSON res: {result: 0/1, error: "xxx"}<br/>
 
-###Hub<br/>
-
-
-
 ## Security middle ware <br/>
 > lusca: https://github.com/krakenjs/lusca <br/>
 > passport-json: https://www.npmjs.com/package/passport-json <br/>
 
+###Hub<br/>
