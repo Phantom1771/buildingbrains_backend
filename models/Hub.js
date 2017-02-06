@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 const hubSchema = new mongoose.Schema({
+  name: { type: String, unique: true },
   hubCode: { type: String, unique: true },
   address: String,
   users: [{type: mongoose.Schema.Types.ObjectID, ref: 'User'}],

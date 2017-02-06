@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 const automationSchema = new mongoose.Schema({
+  name: String,
   automations: [{
     device: {mongoose.Schema.Types.ObjectID, ref: 'Device'},
     settings: Object
