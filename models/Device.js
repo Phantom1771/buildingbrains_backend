@@ -6,7 +6,7 @@ const deviceSchema = new mongoose.Schema({
   name: String,
   address: String,
   hub: String,
-  groups: [{type: mongoose.Schema.Types.ObjectID, ref: 'Group'}],
+  groups: [{type: mongoose.Schema.Types.ObjectId, ref: 'Group'}],
   status: String,
   deviceType: String
 }, { timestamps: true });

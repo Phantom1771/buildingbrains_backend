@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   passwordResetExpires: Date,
 
 
-  hubs: [{type: mongoose.Schema.Types.ObjectID, ref: 'Hub'}],
+  hubs: [{type: mongoose.Schema.Types.ObjectId, ref: 'Hub'}],
 
   facebook: String
 

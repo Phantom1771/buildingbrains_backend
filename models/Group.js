@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const groupSchema = new mongoose.Schema({
   name: String,
-  devices: [{type: Schema.Types.ObjectID, ref: 'Device'}],
+  devices: [{type: mongoose.Schema.Types.ObjectId, ref: 'Device'}],
   hub: String,
   type: String
 });

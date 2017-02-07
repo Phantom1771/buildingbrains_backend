@@ -6,10 +6,10 @@ const hubSchema = new mongoose.Schema({
   name: { type: String, unique: true },
   hubCode: { type: String, unique: true },
   address: String,
-  users: [{type: mongoose.Schema.Types.ObjectID, ref: 'User'}],
-  devices: [{type: mongoose.Schema.Types.ObjectID, ref: 'Device'}],
-  groups: [{type: mongoose.Schema.Types.ObjectID, ref: 'Group'}],
-  automations: [{type: mongoose.Schema.Types.ObjectID, ref: 'Automation'}]
+  users: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+  devices: [{type: mongoose.Schema.Types.ObjectId, ref: 'Device'}],
+  groups: [{type: mongoose.Schema.Types.ObjectId, ref: 'Group'}],
+  automations: [{type: mongoose.Schema.Types.ObjectId, ref: 'Automation'}]
 }, { timestamps: true });
 
 const Hub = mongoose.model('Hub', hubSchema);
