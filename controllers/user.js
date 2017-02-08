@@ -4,15 +4,11 @@ const nodemailer = require('nodemailer');
 const passport = require('passport');
 const User = require('../models/User');
 
-
-/* render react*/
-
-
 /* #1
  * POST users/signup/
  * Create a new local account.
- * JSON Req: { email:"xxx@xxx", password:"xxx", firstname:"xxx", lastname:"xxx"} 
- *JSON Res: { result: 0/1, error:"xxx"} 
+ * JSON Req: { email:"xxx@xxx", password:"xxx", firstname:"xxx", lastname:"xxx"}
+ *JSON Res: { result: 0/1, error:"xxx"}
  */
 
 exports.postSignup = (req, res) => {
@@ -21,7 +17,6 @@ exports.postSignup = (req, res) => {
 
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
-  //req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
   req.sanitize('email').normalizeEmail({ remove_dots: false });
 
   const errors = req.validationErrors();
@@ -41,7 +36,7 @@ exports.postSignup = (req, res) => {
     if (err) {
       return res.json({result:1, error:error});
     }
-    
+
     if (existingUser) {
       return res.json({result:1, error:'Account with that email address already exists.'});
     }
@@ -56,12 +51,12 @@ exports.postSignup = (req, res) => {
 /* #2
  * POST /users/login
  * Sign in using email and password.
- * JSON Req: { email:"xxx@xxx", password:"xxx"} 
- * JSON Res: { result: 0/1, error:"xxx", userToken: "xxx"} 
+ * JSON Req: { email:"xxx@xxx", password:"xxx"}
+ * JSON Res: { result: 0/1, error:"xxx", userToken: "xxx"}
  */
 exports.postLogin = (req, res) => {
   console.log("login \n",req.body);
-  
+
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
   req.sanitize('email').normalizeEmail({ remove_dots: false });
@@ -92,7 +87,7 @@ exports.postLogin = (req, res) => {
 /**
  * POST /login
  * Sign in using email and password.
- 
+
 exports.postLogin = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
@@ -143,7 +138,7 @@ exports.getSignup = (req, res) => {
 /**
  * POST /signup
  * Create a new local account.
- 
+
 exports.postSignup = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
