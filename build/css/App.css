@@ -1,0 +1,112 @@
+.App {
+  text-align: center;
+  background:black;
+}
+
+.App-logo {
+  height: 50px;
+  width: 250px;
+}
+
+.App-header {
+  text-align: left;
+  background-color: black;
+  height: 50px;
+  padding: 20px;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.Home-Button {
+	position: absolute;
+	left:0px;
+	top:90px;
+	right:80px;
+	background:url(../img/homeButton.PNG) no-repeat;
+	vertical-align: bottom;
+    text-align:left;
+	color: black;
+	padding: 32px 32px;
+	font-size:16px;
+	width: 80px;
+	height: 60px;
+}
+
+.Device-Button {
+	position: absolute;
+	left:0px;
+	top:200px;
+	right:80px;
+	background:url(../img/deviceButton.PNG) no-repeat;
+	vertical-align: bottom;
+    text-align:left;
+	color: black;
+	padding: 32px 32px;
+	font-size:16px;
+	width: 80px;
+	height: 90px;
+}
+
+.Stats-Button {
+	position: absolute;
+	left:0px;
+	top:350px;
+	right:80px;
+	background:url(../img/statsButton.PNG) no-repeat;
+	vertical-align: bottom;
+    text-align:left;
+	color: black;
+	padding: 32px 32px;
+	font-size:16px;
+	width: 80px;
+	height: 100px;
+}
+
+.Settings-Button {
+	position: absolute;
+	left:0px;
+	top:510px;
+	right:80px;
+	background:url(../img/settingsButton.PNG) no-repeat;
+	vertical-align: bottom;
+    text-align:left;
+	color: black;
+	padding: 32px 32px;
+	font-size:16px;
+	width: 80px;
+	height: 90px;
+}
+
+.Users-Button {
+	position: absolute;
+	left:0px;
+	top:664px;
+	right:80px;
+	background:url(../img/usersButton.PNG) no-repeat;
+	vertical-align: bottom;
+    text-align:left;
+	color: black;
+	padding: 32px 32px;
+	font-size:16px;
+	width: 80px;
+	height: 90px;
+}
+
+.Welcome {
+	position: absolute;
+	left:400px;
+	top: 200px;
+}
+
+.Notifications {
+	position: absolute;
+	left:900px;
+	top: 200px;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

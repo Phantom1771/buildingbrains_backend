@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
   lastName: String,
   email: { type: String, unique: true },
   password: String,
+  firstname: String,
+  lastname: String,
   passwordResetToken: String,
   passwordResetExpires: Date,
 
@@ -16,6 +18,7 @@ const userSchema = new mongoose.Schema({
   facebook: String
 
 }, { timestamps: true });
+
 
 /**
  * Password hash middleware.

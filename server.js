@@ -19,7 +19,6 @@ const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
-
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 /**
@@ -33,6 +32,7 @@ dotenv.load({ path: '.env.example' });
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
+
 
 /**
  * API keys and Passport configuration.
@@ -79,50 +79,21 @@ server.use(session({
     autoReconnect: true
   })
 }));
-server.use(passport.initialize());
-server.use(passport.session());
+//server.use(passport.initialize());
+//server.use(passport.session());
 server.use(flash());
-server.use((req, res, next) => {
-  if (req.path === '/api/upload') {
-    next();
-  } else {
-    lusca.csrf()(req, res, next);
-  }
-});
-server.use(lusca.xframe('SAMEORIGIN'));
-server.use(lusca.xssProtection(true));
-server.use((req, res, next) => {
-  res.locals.user = req.user;
-  next();
-});
-server.use((req, res, next) => {
-  // After successful login, redirect back to the intended page
-  if (!req.user &&
-      req.path !== '/login' &&
-      req.path !== '/signup' &&
-      !req.path.match(/^\/auth/) &&
-      !req.path.match(/\./)) {
-    req.session.returnTo = req.path;
-  } else if (req.user &&
-      req.path == '/account') {
-    req.session.returnTo = req.path;
-  }
-  next();
-});
-server.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 
 /**
  * Primary server routes.
  */
-server.get('/login', userController.getLogin);
-server.post('/login', userController.postLogin);
+//User
+server.post('/users/signup/', userController.postSignup);
+server.post('/users/login/', userController.postLogin);
 server.get('/logout', userController.logout);
 server.get('/forgot', userController.getForgot);
 server.post('/forgot', userController.postForgot);
 server.get('/reset/:token', userController.getReset);
 server.post('/reset/:token', userController.postReset);
-server.get('/signup', userController.getSignup);
-server.post('/signup', userController.postSignup);
 server.get('/contact', contactController.getContact);
 server.post('/contact', contactController.postContact);
 server.get('/account', passportConfig.isAuthenticated, userController.getAccount);
