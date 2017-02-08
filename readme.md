@@ -1,25 +1,23 @@
 ##API<br/>
-###Frontend<br/>
-
+###Users<br/>
 ###<br/>
 >1. Signup: 
 >> Route: http://0.0.0.0:0000/users/signup/ <br/>
 >> HTTP Verb: POST <br/>
->> JSON Req: { email:"xxx@xxx", password:"xxx", firstname:"xxx", lastname:"xxx"} <br/>
->> JSON Res: { result: 0/1, error:"xxx"} <br/>
+>> JSON Req: {email:"xxx@xxx", password:"xxx", firstname:"xxx", lastname:"xxx"} <br/>
+>> JSON Res: {result: 0/1, error:"xxx"} <br/>
 
 >2. Login: 
 >> Route: http://0.0.0.0:0000/users/login/ <br/>
 >> HTTP Verb: POST <br/>
->> JSON Req: { email:"xxx@xxx", password:"xxx"} <br/>
->> JSON Res: { result: 0/1, error:"xxx", userToken: "xxx"} <br/>
+>> JSON Req: {email:"xxx@xxx", password:"xxx"} <br/>
+>> JSON Res: {result: 0/1, error:"xxx", userToken: "xxx"} <br/>
 
-//May not need
 >3. Logout: 
 >> Route: http://0.0.0.0:0000/users/logout <br/>
->> HTTP Verb: GET <br/>
->> JSON req: {}<br/>
->> JSON res: {}<br/>
+>> HTTP Verb: POST <br/>
+>> JSON req: {userToken: "xxx"}<br/>
+>> JSON res: {result: 0/1, error:"xxx"}<br/>
 
 >4. Forgot password: <br/>
 >> Route: http://0.0.0.0:0000/users/forgot <br/>
@@ -72,5 +70,3 @@
 ## Security middle ware <br/>
 > lusca: https://github.com/krakenjs/lusca <br/>
 > passport-json: https://www.npmjs.com/package/passport-json <br/>
-
-###Hub<br/>
