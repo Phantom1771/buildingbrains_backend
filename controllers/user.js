@@ -82,7 +82,14 @@ exports.postLogin = (req, res) => {
   });
 };
 
-
+/** #3 
+ * GET /users/logout/
+ * Log out.
+ */
+exports.psotLogout = (req, res) => {
+  req.logout();
+  res.redirect('/');
+};
 
 /**
  * POST /login

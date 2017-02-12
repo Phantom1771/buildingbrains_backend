@@ -89,7 +89,8 @@ server.use(flash());
 //User
 server.post('/users/signup/', userController.postSignup);
 server.post('/users/login/', userController.postLogin);
-server.get('/logout', userController.logout);
+server.get('/users/logout/', userController.postLogout);
+
 server.get('/forgot', userController.getForgot);
 server.post('/forgot', userController.postForgot);
 server.get('/reset/:token', userController.getReset);
