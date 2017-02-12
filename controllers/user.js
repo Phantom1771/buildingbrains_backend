@@ -86,7 +86,7 @@ exports.postLogin = (req, res) => {
  * GET /users/logout/
  * Log out.
  */
-exports.psotLogout = (req, res) => {
+exports.postLogout = (req, res) => {
   req.logout();
   res.redirect('/');
 };
