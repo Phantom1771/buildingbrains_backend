@@ -55,12 +55,14 @@ exports.postSignup = (req, res) => {
 };
 
 /* #2
- * POST /users/login
+ * POST /users/login/
  * Sign in using email and password.
  * JSON Req: { email:"xxx@xxx", password:"xxx"}
  * JSON Res: { result: 0/1, error:"xxx", userToken: "xxx"}
  */
 exports.postLogin = (req, res) => {
+
+  console.log("postLogin \n",req.body);
 
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
@@ -98,6 +100,8 @@ exports.postLogin = (req, res) => {
  * JSON Res: { result: 0/1, error:"xxx" }
  */
 exports.postLogout = (req, res) => {
+
+  console.log("postLogout \n",req.body);
   // check header or url parameters or post parameters for token
   var token = req.body.token || req.query.token || req.headers['x-access-token'];
   
