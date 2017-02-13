@@ -5,7 +5,7 @@
 >> Route: http://0.0.0.0:0000/users/signup/ <br/>
 >> HTTP Verb: POST <br/>
 >> JSON Req: {email:"xxx@xxx", password:"xxx", firstname:"xxx", lastname:"xxx"} <br/>
->> JSON Res: {result: 0/1, error:"xxx"} <br/>
+>> JSON Res: {result: 0/1, error:"xxx", userToken:"xxx"} <br/>
 
 >2. Login: 
 >> Route: http://0.0.0.0:0000/users/login/ <br/>
