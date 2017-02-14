@@ -1,6 +1,5 @@
 ##API<br/>
 ###Users<br/>
-###<br/>
 >1. Signup: 
 >> Route: http://0.0.0.0:0000/users/signup/ <br/>
 >> HTTP Verb: POST <br/>
@@ -66,6 +65,38 @@
 >> HTTP Verb: POST <br/>
 >> JSON req: {userToken: "xxx"}<br/>
 >> JSON res: {result: 0/1, error: "xxx"}<br/>
+
+###Hubs<br/>
+>1. Add Hub:<br/>
+>> Route: http://0.0.0.0:0000/hubs/add <br/>
+>> HTTP Verb: POST <br/>
+>> JSON req: {}<br/>
+>> JSON res: {}<br/>
+
+>2. Delete Hub:<br/>
+>> Route: http://0.0.0.0:0000/hubs/delete <br/>
+>> HTTP Verb: POST <br/>
+>> JSON req: {}<br/>
+>> JSON res: {}<br/>
+
+###Devices
+>1. Add Device:<br/>
+>> Route: http://0.0.0.0:0000/hubs/addDevice <br/>
+>> HTTP Verb: POST <br/>
+>> JSON req: {}<br/>
+>> JSON res: {}<br/>
+
+>2. Update Device:<br/>
+>> Route: http://0.0.0.0:0000/hubs/updateDevice <br/>
+>> HTTP Verb: POST <br/>
+>> JSON req: {}<br/>
+>> JSON res: {}<br/>
+
+>3. Delete Device:<br/>
+>> Route: http://0.0.0.0:0000/hubs/deleteDevice <br/>
+>> HTTP Verb: POST <br/>
+>> JSON req: {}<br/>
+>> JSON res: {}<br/>
 
 ## Security middle ware <br/>
 > lusca: https://github.com/krakenjs/lusca <br/>
