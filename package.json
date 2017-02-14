@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "###<br/> >1. Signup:  >> Route: http://0.0.0.0:0000/users/signup/ <br/> >> HTTP Verb: POST <br/> >> JSON Req: { email:\"xxx@xxx\", password:\"xxx\", firstname:\"xxx\", lastname:\"xxx\"} <br/> >> JSON Res: { result: 0/1, error:\"xxx\"} <br/>",
   "engines":{
-    "node":"6.7.x"
+    "node":"6.7.x",
+    "npm":"3.10.x"
   },
   "main": "server.js",
   "directories": {
