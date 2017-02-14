@@ -1,0 +1,27 @@
+{
+  "name": "buildingbrain",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^7.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/StattikRose/buildingbrains_backend/issues"
+  },
+  "homepage": "https://github.com/StattikRose/buildingbrains_backend#readme",
+  "engines":{
+    "node":"6.7.0",
+    "npm":"3.10.x"
+  }
+}
