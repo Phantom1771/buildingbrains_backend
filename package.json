@@ -2,7 +2,6 @@
   "name": "buildingbrain",
   "version": "0.0.1",
   "description": "",
-  
   "main": "server.js",
   "directories": {
     "test": "test"
@@ -15,10 +14,6 @@
     "test": "mocha",
     "start": "node server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/StattikRose/buildingbrains_backend.git"
-  },
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -26,7 +21,7 @@
   },
   "homepage": "https://github.com/StattikRose/buildingbrains_backend#readme",
   "engines":{
-    "node":"6.7.x",
+    "node":"6.0.0",
     "npm":"3.10.x"
   }
 }
