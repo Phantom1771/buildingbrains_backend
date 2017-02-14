@@ -1,11 +1,8 @@
 {
   "name": "buildingbrain",
   "version": "0.0.1",
-  "description": "###<br/> >1. Signup:  >> Route: http://0.0.0.0:0000/users/signup/ <br/> >> HTTP Verb: POST <br/> >> JSON Req: { email:\"xxx@xxx\", password:\"xxx\", firstname:\"xxx\", lastname:\"xxx\"} <br/> >> JSON Res: { result: 0/1, error:\"xxx\"} <br/>",
-  "engines":{
-    "node":"6.7.x",
-    "npm":"3.10.x"
-  },
+  "description": "",
+  
   "main": "server.js",
   "directories": {
     "test": "test"
@@ -27,5 +24,9 @@
   "bugs": {
     "url": "https://github.com/StattikRose/buildingbrains_backend/issues"
   },
-  "homepage": "https://github.com/StattikRose/buildingbrains_backend#readme"
+  "homepage": "https://github.com/StattikRose/buildingbrains_backend#readme",
+  "engines":{
+    "node":"6.7.x",
+    "npm":"3.10.x"
+  }
 }
