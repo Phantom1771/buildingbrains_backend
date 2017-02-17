@@ -3,14 +3,16 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const passport = require('passport');
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+const config = require('../config');
+
 
 /* #1
  * POST users/signup/
  * Create a new local account.
  * JSON Req: { email:"xxx@xxx", password:"xxx", firstname:"xxx", lastname:"xxx"}
- *JSON Res: { result: 0/1, error:"xxx"}
+ * JSON Res: { result: 0/1, error:"xxx", userToken:"xxx"}
  */
-
 exports.postSignup = (req, res) => {
 
   console.log("postSignup \n",req.body);
@@ -43,19 +45,24 @@ exports.postSignup = (req, res) => {
 
     user.save((err) => {
       if (err) { return next(err); }
-      return res.json({result:0,error:""});
+      // if user is saved, create a token
+          var token = jwt.sign(user, config.secret, {
+          expiresIn : 60*60*24 // expires in 24 hours
+          });
+      return res.json({result:0,error:"", token});
     });
   });
 };
 
 /* #2
- * POST /users/login
+ * POST /users/login/
  * Sign in using email and password.
  * JSON Req: { email:"xxx@xxx", password:"xxx"}
  * JSON Res: { result: 0/1, error:"xxx", userToken: "xxx"}
  */
 exports.postLogin = (req, res) => {
-  console.log("login \n",req.body);
+
+  console.log("postLogin \n",req.body);
 
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
@@ -73,7 +80,11 @@ exports.postLogin = (req, res) => {
     if (existingUser) {
       existingUser.comparePassword(req.body.password, function(err, isMatch) {
         if (isMatch) {
-          return res.json({result:0, error:""});
+          // if user is found and password is right create a token
+          var token = jwt.sign(existingUser, config.secret, {
+          expiresIn : 60*60*24 // expires in 24 hours
+          });
+          return res.json({result:0, error:"", usertoken: token});
         }
           return res.json({result:1, error:"Password incorrect!"});
     });
@@ -82,6 +93,32 @@ exports.postLogin = (req, res) => {
   });
 };
 
+/** #3 
+ * POST /users/logout/
+ * Log out.
+ * JSON Req: { userToken:"xxx" }
+ * JSON Res: { result: 0/1, error:"xxx" }
+ */
+exports.postLogout = (req, res) => {
+
+  console.log("postLogout \n",req.body);
+  // check header or url parameters or post parameters for token
+  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+  
+  if(token){
+    // verifies secret and checks exp
+    jwt.verify(token, config.secret, function(err, decoded) {      
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });} 
+      else { // if everything is good, save to request for use in other routes
+        req.decoded = decoded;
+        return res.json({ result: 0, error: '' });
+      }
+    });
+  }
+  else{ // if there is no token return an error
+    return res.json({ result: 1, error: 'No token provided.' });
+  }
+};
 
 
 /**
