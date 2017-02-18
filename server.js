@@ -54,7 +54,7 @@ mongoose.connection.on('error', () => {
   process.exit();
 });
 
-server.set('superSecret', config.secret); 
+server.set('superSecret', config.secret);
 
 /**
  * Express configuration.
@@ -70,8 +70,13 @@ server.use(compression());
 }));*/
 server.use(logger('dev'));
 server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: false }));
+server.use(bodyParser.urlencoded({ extended: true }));
 server.use(expressValidator());
+server.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 /**
  * Primary server routes.
