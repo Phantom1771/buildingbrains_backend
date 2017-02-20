@@ -6,7 +6,9 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 
-
+exports.getTest = (req, res) => {
+  res.json({Note:"Welcome BuildingBrain Team, Please use Restful API!"});
+};
 /* #1
  * POST users/signup/
  * Create a new local account.

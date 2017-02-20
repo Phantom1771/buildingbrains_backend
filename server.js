@@ -82,6 +82,7 @@ server.use(function(req, res, next) {
  * Primary server routes.
  */
 //User
+server.get('/', userController.getTest);
 server.post('/users/signup/', userController.postSignup);
 server.post('/users/login/', userController.postLogin);
 server.post('/users/logout/', userController.postLogout);
