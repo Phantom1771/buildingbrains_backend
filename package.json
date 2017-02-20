@@ -1,32 +1,51 @@
 {
-  "name": "buildingbrain",
-  "version": "0.0.1",
-  "description": "",
-  
-  "main": "server.js",
-  "directories": {
-    "test": "test"
-  },
-  "dependencies": {
-    "jsonwebtoken": "^7.2.1"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "mocha",
-    "start": "node server.js"
-  },
+  "name": "buildingbrains-backend",
+  "version": "1.0.0",
+  "description": "A api server for building brains",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/StattikRose/buildingbrains_backend.git"
+    "url": "https://github.com/StattikRose/buildingbrains_backend"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/StattikRose/buildingbrains_backend/issues"
+  "author": "Building Brains",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server.js",
+    "test": "mocha --reporter spec"
   },
-  "homepage": "https://github.com/StattikRose/buildingbrains_backend#readme",
-  "engines":{
-    "node":"6.7.x",
-    "npm":"3.10.x"
+  "dependencies": {
+    "async": "^2.1.2",
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.15.2",
+    "chalk": "^1.1.3",
+    "cheerio": "^0.22.0",
+    "clockwork": "^0.1.4",
+    "compression": "^1.6.2",
+    "connect-mongo": "^1.3.2",
+    "dotenv": "^2.0.0",
+    "errorhandler": "^1.4.3",
+    "express": "^4.14.0",
+    "express-flash": "^0.0.2",
+    "express-status-monitor": "^0.1.5",
+    "express-validator": "^3.1.2",
+    "github": "^7.2.0",
+    "jsonwebtoken": "^7.2.1",
+    "lodash": "^4.16.6",
+    "mongoose": "^4.6.6",
+    "morgan": "^1.7.0",
+    "node-sass-middleware": "^0.10.0",
+    "nodemailer": "^2.6.4",
+    "nodemon": "^1.11.0",
+    "request": "^2.78.0",
+    "validator": "^6.1.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^3.9.1",
+    "eslint-config-airbnb-base": "^11.0.0",
+    "eslint-plugin-import": "^2.1.0",
+    "mocha": "^3.1.2",
+    "sinon": "^1.17.6",
+    "sinon-mongoose": "^1.3.0",
+    "supertest": "^2.0.1"
   }
 }

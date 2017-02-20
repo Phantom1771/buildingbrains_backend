@@ -1,18 +1,18 @@
 ##API<br/>
 ###Users<br/>
-1. Signup: 
+1. Signup:
 > Route: http://0.0.0.0:0000/users/signup/ <br/>
 > HTTP Verb: POST <br/>
 > JSON Req: {email:"xxx@xxx", password:"xxx", firstname:"xxx", lastname:"xxx"} <br/>
 > JSON Res: {result: 0/1, error:"xxx", userToken:"xxx"} <br/>
 
-2. Login: 
+2. Login:
 > Route: http://0.0.0.0:0000/users/login/ <br/>
 > HTTP Verb: POST <br/>
 > JSON Req: {email:"xxx@xxx", password:"xxx"} <br/>
 > JSON Res: {result: 0/1, error:"xxx", userToken: "xxx"} <br/>
 
-3. Logout: 
+3. Logout:
 > Route: http://0.0.0.0:0000/users/logout <br/>
 > HTTP Verb: POST <br/>
 > JSON req: {userToken: "xxx"}<br/>
@@ -70,34 +70,30 @@
 1. Add Hub:<br/>
 > Route: http://0.0.0.0:0000/hubs/add <br/>
 > HTTP Verb: POST <br/>
-> JSON req: {}<br/>
-> JSON res: {}<br/>
+> JSON req: {hubCode: "xxx", hubName: "xxx", userToken: "xxx"}<br/>
+> JSON res: {result: 0/1, error: "xxx"}<br/>
 
 2. Delete Hub:<br/>
 > Route: http://0.0.0.0:0000/hubs/delete <br/>
 > HTTP Verb: POST <br/>
-> JSON req: {}<br/>
-> JSON res: {}<br/>
+> JSON req: {hubName: "xxx", userToken: "xxx"}<br/>
+> JSON res: {result: 0/1, error: "xxx"}<br/>
 
-###Devices
+###Devices<br/>
 1. Add Device:<br/>
-> Route: http://0.0.0.0:0000/hubs/addDevice <br/>
+> Route: http://0.0.0.0:0000/devices/add <br/>
 > HTTP Verb: POST <br/>
-> JSON req: {}<br/>
-> JSON res: {}<br/>
+> JSON req: {hubName: "xxx", deviceAddress: "xxx", deviceName: "xxx", userToken: "xxx"}<br/>
+> JSON res: {result: 0/1, error: "xxx"}<br/>
 
 2. Update Device:<br/>
-> Route: http://0.0.0.0:0000/hubs/updateDevice <br/>
+> Route: http://0.0.0.0:0000/devices/update <br/>
 > HTTP Verb: POST <br/>
-> JSON req: {}<br/>
-> JSON res: {}<br/>
+> JSON req: {hubName: "xxx", deviceName: "xxx", deviceSettings: {settings}, userToken: "xxx"}<br/>
+> JSON res: {result: 0/1, error: "xxx"}<br/>
 
 3. Delete Device:<br/>
-> Route: http://0.0.0.0:0000/hubs/deleteDevice <br/>
+> Route: http://0.0.0.0:0000/devices/delete <br/>
 > HTTP Verb: POST <br/>
-> JSON req: {}<br/>
-> JSON res: {}<br/>
-
-## Security middle ware <br/>
-> lusca: https://github.com/krakenjs/lusca <br/>
-> passport-json: https://www.npmjs.com/package/passport-json <br/>
+> JSON req: {deviceName: "xxx", userToken: "xxx"}<br/>
+> JSON res: {result: 0/1, error: "xxx"}<br/>

@@ -1,10 +1,9 @@
 const async = require('async');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const passport = require('passport');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const config = require('../config');
+const dotenv = require('dotenv');
 
 
 /* #1
@@ -46,7 +45,7 @@ exports.postSignup = (req, res) => {
     user.save((err) => {
       if (err) { return next(err); }
       // if user is saved, create a token
-          var token = jwt.sign(user, config.secret, {
+          var token = jwt.sign(user, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
           });
       return res.json({result:0,error:"", token});
@@ -81,7 +80,7 @@ exports.postLogin = (req, res) => {
       existingUser.comparePassword(req.body.password, function(err, isMatch) {
         if (isMatch) {
           // if user is found and password is right create a token
-          var token = jwt.sign(existingUser, config.secret, {
+          var token = jwt.sign(existingUser, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
           });
           return res.json({result:0, error:"", usertoken: token});
@@ -93,7 +92,7 @@ exports.postLogin = (req, res) => {
   });
 };
 
-/** #3 
+/** #3
  * POST /users/logout/
  * Log out.
  * JSON Req: { userToken:"xxx" }
@@ -104,11 +103,11 @@ exports.postLogout = (req, res) => {
   console.log("postLogout \n",req.body);
   // check header or url parameters or post parameters for token
   var token = req.body.token || req.query.token || req.headers['x-access-token'];
-  
+
   if(token){
     // verifies secret and checks exp
-    jwt.verify(token, config.secret, function(err, decoded) {      
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });} 
+    jwt.verify(token, config.secret, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
       else { // if everything is good, save to request for use in other routes
         req.decoded = decoded;
         return res.json({ result: 0, error: '' });
@@ -118,108 +117,6 @@ exports.postLogout = (req, res) => {
   else{ // if there is no token return an error
     return res.json({ result: 1, error: 'No token provided.' });
   }
-};
-
-
-/**
- * POST /login
- * Sign in using email and password.
-
-exports.postLogin = (req, res, next) => {
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('password', 'Password cannot be blank').notEmpty();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
-
-  const errors = req.validationErrors();
-
-  if (errors) {
-    req.flash('errors', errors);
-    return res.redirect('/login');
-  }
-
-  passport.authenticate('local', (err, user, info) => {
-    if (err) { return next(err); }
-    if (!user) {
-      req.flash('errors', info);
-      return res.redirect('/login');
-    }
-    req.logIn(user, (err) => {
-      if (err) { return next(err); }
-      req.flash('success', { msg: 'Success! You are logged in.' });
-      res.redirect(req.session.returnTo || '/');
-    });
-  })(req, res, next);
-};
-*/
-/**
- * GET /logout
- * Log out.
- */
-exports.logout = (req, res) => {
-  req.logout();
-  res.redirect('/');
-};
-
-/**
- * GET /signup
- * Signup page.
- */
-exports.getSignup = (req, res) => {
-  if (req.user) {
-    return res.redirect('/');
-  }
-  var newUser = new
-  res.json({result:0,error:"Ok"})
-};
-
-/**
- * POST /signup
- * Create a new local account.
-
-exports.postSignup = (req, res, next) => {
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('password', 'Password must be at least 4 characters long').len(4);
-  req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
-
-  const errors = req.validationErrors();
-
-  if (errors) {
-    req.flash('errors', errors);
-    return res.redirect('/signup');
-  }
-
-  const user = new User({
-    email: req.body.email,
-    password: req.body.password
-  });
-
-  User.findOne({ email: req.body.email }, (err, existingUser) => {
-    if (err) { return next(err); }
-    if (existingUser) {
-      req.flash('errors', { msg: 'Account with that email address already exists.' });
-      return res.redirect('/signup');
-    }
-    user.save((err) => {
-      if (err) { return next(err); }
-      req.logIn(user, (err) => {
-        if (err) {
-          return next(err);
-        }
-        res.redirect('/');
-      });
-    });
-  });
-};
-
-/**
- * GET /account
- * Profile page.
- */
-exports.getAccount = (req, res) => {
-  res.render('account/profile', {
-    title: 'Account Management'
-  });
 };
 
 /**
