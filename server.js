@@ -1,6 +1,3 @@
-
-
-
 /**
  * Module dependencies.
  */
@@ -83,6 +80,11 @@ server.post('/account/delete', userController.postDeleteAccount)
 
 //Contact
 server.post('/contact', contactController.postContact);
+
+//Hub
+server.post('/hubs/register', hubController.postRegister);
+server.post('/hubs/add', hubController.postAdd);
+server.post('/hubs/delete', hubController.postDelete);
 
 /**
  * Error Handler.
