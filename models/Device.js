@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const deviceSchema = new mongoose.Schema({
   name: String,
   link: String,
-  hub: type: mongoose.Schema.Types.ObjectId, ref: 'Hub',
+  hub: {type: mongoose.Schema.Types.ObjectId, ref: 'Hub'},
   state: String,
   type: String,
   catagory: String,
