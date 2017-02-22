@@ -4,26 +4,53 @@ const Device = require('../models/Device');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
-/* #1
+/* 1.
+ * GET devices/
+ * Return all of users devices
+ * Authentication: Auth Header
+ * JSON res: {result: 0/1, error: "xxx", devices: {device}}
+ */
+exports.getAll = (req, res) => {};
+
+/* 2.
+ * GET devices/deviceID
+ * Return status of device
+ * Authentication: Auth Header
+ * JSON res: {result: 0/1, error: "xxx", device: {device}}
+ */
+exports.getDevice = (req, res) => {};
+
+/* 3.
+ * GET devices/nearby
+ * Returns list of unregistered nearby devices
+ * Authentication: Auth Header
+ * JSON res: {result: 0/1, error: "xxx", devices: {device}}
+ */
+exports.getNearby = (req, res) => {};
+
+/* 4.
  * POST devices/add
- * Add a device to a hub.
- * JSON Req: {hubName: "xxx", deviceAddress: "xxx", deviceName: "xxx", userToken: "xxx"}
- * JSON Res: {result: 0/1, error: "xxx"}
+ * Adds a device to a users hub
+ * Authentication: Auth Header
+ * JSON req: {hubID: "xxx", deviceLink: "xxx", deviceName: "xxx"}
+ * JSON res: {result: 0/1, error: "xxx"}
  */
-exports.postAdd = (req, res) => {};
+ exports.postAdd = (req, res) => {};
 
-/* #2
+/* 5.
  * POST devices/update
- * update a device that already exists on a hub.
- * JSON Req: {hubName: "xxx", deviceName: "xxx", deviceSettings: {settings}, userToken: "xxx"}
- * JSON Res: {result: 0/1, error: "xxx"}
+ * Updates the device status
+ * Authentication: Auth Header
+ * JSON req: {hubID: "xxx", deviceID: "xxx", deviceSettings: {settings}}
+ * JSON res: {result: 0/1, error: "xxx"}
  */
-exports.postAdd = (req, res) => {};
+ exports.postUpdate = (req, res) => {};
 
- /* #3
-  * POST devices/delete
-  * Delete a device from a hub.
-  * JSON Req: {deviceName: "xxx", userToken: "xxx"}
-  * JSON Res: {result: 0/1, error: "xxx"}
-  */
-exports.postDelete = (req, res) => {};
+/* 6.
+ * POST devices/delete
+ * Delete device from a users hub
+ * Authentication: Auth Header
+ * JSON req: {hubID: "xxx", deviceID: "xxx"}
+ * JSON res: {result: 0/1, error: "xxx"}
+ */
+ exports.postDelete = (req, res) => {};
