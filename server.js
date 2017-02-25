@@ -86,13 +86,20 @@ server.get('/', userController.getTest);
 server.post('/users/signup/', userController.postSignup);
 server.post('/users/login/', userController.postLogin);
 server.post('/users/logout/', userController.postLogout);
+server.post('/users/forgot/', userController.postForgot);
+server.post('/users/reset/', userController.postReset);
+server.post('/users/account/', userController.postAccount);
+server.post('/users/account/profile/', userController.postUpdateProfile);
+server.post('/users/account/delete/', userController.postDeleteAccount);
 
-//server.get('/users/test/', userController.getTest);
+
+
+
+/*server.get('/users/test/', userController.getTest);
 
 server.get('/forgot', userController.getForgot);
 server.post('/forgot', userController.postForgot);
 server.get('/reset/:token', userController.getReset);
-server.post('/reset/:token', userController.postReset);
 server.get('/contact', contactController.getContact);
 server.post('/contact', contactController.postContact);
 /*server.get('/account', passportConfig.isAuthenticated, userController.getAccount);
