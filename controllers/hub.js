@@ -49,7 +49,7 @@ exports.postAdd = (req, res) => {
                   existingHub.name = req.body.hubName;
                   existingHub.save();
                 }
-                //This prevents duplicates
+                //This gets rid of ducplicates
                 existingUser.hubs.pull(existingHub);
                 existingHub.users.pull(existingUser);
 
@@ -123,7 +123,7 @@ exports.postDelete = (req, res) => {
                 existingUser.save();
                 existingHub.save();
 
-                return res.json({result:0, error:"", hub: existingHub, user: existingUser});
+                return res.json({result:0, error:""});
               }
               else{
                 return res.json({result:1, error:"User could not be found, hub could not be added."});
@@ -166,14 +166,21 @@ exports.getAll = (req, res) => {
       else { // if everything is good
         user = decoded._doc;
 
-        return res.json({ result: 0, errors: "", hubs: user.hubs})
+        User.findOne({ _id:user._id}, (err, existingUser) => {
+          if(existingUser){
+            console.log(existingUser);
+            return res.json({ result: 0, errors: "", hubs: existingUser.hubs})
+          }
+          else{
+            return res.json({ result: 1, errors: "User not found"});
+          }
+        });
       }
     });
   }
   else{ // if there is no token return an error
     return res.json({ result: 1, error: 'No token provided.' });
   }
-
 };
 
 /* #4
@@ -189,6 +196,7 @@ exports.postRegister = (req, res) => {
 
   console.log("postRegister \n",req.body);
 
+  req.assert('address', 'Address is empty').notEmpty();
   req.assert('hubCode', 'hubCode is empty').notEmpty();
 
   const errors = req.validationErrors();
@@ -199,7 +207,7 @@ exports.postRegister = (req, res) => {
 
   const hub = new Hub({
     hubCode:req.body.hubCode,
-    address:req.headers['ip']
+    address:req.body.address
   });
 
   Hub.findOne({ hubCode:req.body.hubCode}, (err, existingHub) => {
@@ -212,7 +220,7 @@ exports.postRegister = (req, res) => {
     }
 
     hub.save((err) => {
-      if (err) { return next(err); }
+      if (err) { return res.json({result:1, error:err}); }
       return res.json({result:0, error:""});
     });
   });

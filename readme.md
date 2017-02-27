@@ -80,6 +80,12 @@
 > JSON req: {hubID: "xxx"}<br/>
 > JSON res: {result: 0/1, error: "xxx"}<br/>
 
+1. Get Hubs:<br/>
+> Route: http://0.0.0.0:0000/hubs/ <br/>
+> HTTP Verb: GET <br/>
+> Authentication: Auth Header
+> JSON res: {result: 0/1, error: "xxx", hubs: {hub}}<br/>
+
 ###Devices<br/>
 1. Get Devices:<br/>
 > Route: http://0.0.0.0:0000/devices/ <br/>

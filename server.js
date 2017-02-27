@@ -78,14 +78,14 @@ server.post('/account/profile', userController.postUpdateProfile);
 server.post('/account/password', userController.postUpdatePassword);
 server.post('/account/delete', userController.postDeleteAccount)
 
+//Contact
+server.post('/contact', contactController.postContact);
+
 //Hub
 server.post('/hubs/register', hubController.postRegister);
 server.post('/hubs/add', hubController.postAdd);
 server.post('/hubs/delete', hubController.postDelete);
 server.get('/hubs/', hubController.getAll);
-
-//Device
-
 
 /**
  * Error Handler.
