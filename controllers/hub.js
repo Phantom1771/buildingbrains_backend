@@ -143,6 +143,40 @@ exports.postDelete = (req, res) => {
 };
 
 /* #3
+ * GET hubs/
+ * Return all of users hubs
+ * Authentication: Auth Header
+ * JSON res: {result: 0/1, error: "xxx", hubs: {hub}}
+ */
+exports.getAll = (req, res) => {
+  console.log("getAll \n", req.body);
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    return res.json({result:1, error:errors});
+  }
+
+  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+  if(token){
+    // verifies secret and checks exp
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
+      else { // if everything is good
+        user = decoded._doc;
+
+        return res.json({ result: 0, errors: "", hubs: user.hubs})
+      }
+    });
+  }
+  else{ // if there is no token return an error
+    return res.json({ result: 1, error: 'No token provided.' });
+  }
+
+};
+
+/* #4
  * POST hubs/register
  * THIS CALL IS ONLY FOR THE HUB
  * Sends hub information to backend,
@@ -155,7 +189,6 @@ exports.postRegister = (req, res) => {
 
   console.log("postRegister \n",req.body);
 
-  req.assert('address', 'Address is empty').notEmpty();
   req.assert('hubCode', 'hubCode is empty').notEmpty();
 
   const errors = req.validationErrors();
@@ -166,7 +199,7 @@ exports.postRegister = (req, res) => {
 
   const hub = new Hub({
     hubCode:req.body.hubCode,
-    address:req.body.address
+    address:req.headers['ip']
   });
 
   Hub.findOne({ hubCode:req.body.hubCode}, (err, existingHub) => {
