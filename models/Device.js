@@ -4,12 +4,13 @@ const mongoose = require('mongoose');
 
 const deviceSchema = new mongoose.Schema({
   name: String,
-  link: String,
+  link: { type: String, unique: true },
   hub: {type: mongoose.Schema.Types.ObjectId, ref: 'Hub'},
   state: String,
   type: String,
   catagory: String,
-  groups: [{type: mongoose.Schema.Types.ObjectId, ref: 'Group'}]
+  groups: [{type: mongoose.Schema.Types.ObjectId, ref: 'Group'}],
+  params: [String]
 }, { timestamps: true });
 
 const Device = mongoose.model('Device', deviceSchema);
