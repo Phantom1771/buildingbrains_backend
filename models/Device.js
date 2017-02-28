@@ -8,9 +8,10 @@ const deviceSchema = new mongoose.Schema({
   hub: {type: mongoose.Schema.Types.ObjectId, ref: 'Hub'},
   state: String,
   type: String,
-  catagory: String,
+  category: String,
   groups: [{type: mongoose.Schema.Types.ObjectId, ref: 'Group'}],
-  params: [String]
+  params: [String],
+  registered: Boolean
 }, { timestamps: true });
 
 const Device = mongoose.model('Device', deviceSchema);

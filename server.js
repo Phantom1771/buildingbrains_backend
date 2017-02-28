@@ -26,6 +26,7 @@ dotenv.load({ path: '.env.example' });
 const userController = require('./controllers/user');
 const hubController = require('./controllers/hub');
 const contactController = require('./controllers/contact');
+const deviceController = require('./controllers/device');
 
 /**
  * Create Express server.
@@ -86,6 +87,11 @@ server.post('/hubs/register', hubController.postRegister);
 server.post('/hubs/add', hubController.postAdd);
 server.post('/hubs/delete', hubController.postDelete);
 server.get('/hubs/', hubController.getAll);
+
+//Device
+server.post('/devices/register', deviceController.postRegister);
+server.post('/devices/nearby', deviceController.postNearby);
+server.post('/devices/add', deviceController.postAdd);
 
 /**
  * Error Handler.

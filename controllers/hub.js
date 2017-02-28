@@ -168,7 +168,6 @@ exports.getAll = (req, res) => {
 
         User.findOne({ _id:user._id}, (err, existingUser) => {
           if(existingUser){
-            console.log(existingUser);
             return res.json({ result: 0, errors: "", hubs: existingUser.hubs})
           }
           else{

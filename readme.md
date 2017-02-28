@@ -58,13 +58,6 @@
 > JSON req: {}<br/>
 > JSON res: {result: 0/1, error: "xxx"}<br/>
 
-###Contact Us<br/>
-1. Contact Us: <br/>
-> Route: http://0.0.0.0:0000/contact <br/>
-> HTTP Verb: POST <br/>
-> JSON req: {name: "xxx", email: "xxx@xxx", message: "xxx"}<br/>
-> JSON res: {result: 0/1, error: "xxx"}<br/>
-
 ###Hubs<br/>
 1. Add Hub:<br/>
 > Route: http://0.0.0.0:0000/hubs/add <br/>
@@ -80,11 +73,18 @@
 > JSON req: {hubID: "xxx"}<br/>
 > JSON res: {result: 0/1, error: "xxx"}<br/>
 
-1. Get Hubs:<br/>
+3. Get Hubs:<br/>
 > Route: http://0.0.0.0:0000/hubs/ <br/>
 > HTTP Verb: GET <br/>
 > Authentication: Auth Header
 > JSON res: {result: 0/1, error: "xxx", hubs: {hub}}<br/>
+
+4. Hub Register: <br/>
+> Route: http://0.0.0.0:000/hubs/register <br/>
+> HTTP Verb: POST <br/>
+> THIS CALL IS ONLY FOR THE HUB <br/>
+> JSON req: {address: "xxx", hubCode: "xxx"} <br/>
+> JSON res: {result: 0/1, error: "xxx"} <br/>
 
 ###Devices<br/>
 1. Get Devices:<br/>
@@ -101,8 +101,9 @@
 
 3. Search Nearby Devices:<br/>
 > Route: http://0.0.0.0:0000/devices/nearby <br/>
-> HTTP Verb: GET <br/>
+> HTTP Verb: POST <br/>
 > Authentication: Auth Header
+> JSON req: {hubID: "xxx"}
 > JSON res: {result: 0/1, error: "xxx", devices: {device}}<br/>
 
 4. Add Device and get/store status:<br/>
@@ -125,3 +126,10 @@
 > Authentication: Auth Header
 > JSON req: {hubID: "xxx", deviceID: "xxx"}<br/>
 > JSON res: {result: 0/1, error: "xxx"}<br/>
+
+7. Hub Register Device: <br/>
+> Route: http://0.0.0.0:000/devices/register <br/>
+> HTTP Verb: POST <br/>
+> THIS CALL IS ONLY FOR THE HUB <br/>
+> JSON req: {deviceLink: "xxx", hubCode: "xxx"} <br/>
+> JSON res: {result: 0/1, error: "xxx"} <br/>
