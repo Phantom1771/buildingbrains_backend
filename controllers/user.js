@@ -148,7 +148,10 @@ exports.postForgot = (req, res) => {
       return res.json({result:1, error:err});
     }
     if (existingUser) {
-      email_content = "<h3>Hi "+existingUser.lastname+", </h3> <p>We have received a request to reset your password. If you did not make the request, just ignore this email.<p><p>Otherwise, you can reset your password using this link: <a> http://127.0.0.1:3000/</a>.<p></br> Thanks,</br>BuildingBrains Team"
+      var token = jwt.sign(existingUser, config.secret, {
+          expiresIn : 60*60 // expires in 1 hours
+          });
+      email_content = "<h3>Hi "+existingUser.lastname+", </h3> <p>We have received a request to reset your password. If you did not make the request, just ignore this email.<p><p>Otherwise, you can reset your password using this temp password: "+token+".<p></br> Thanks,</br>BuildingBrains Team"
       from_email = new helper.Email("BuildingBrains@colorado.edu");
       to_email = new helper.Email("yang.song@colorado.edu");
       subject = "Reset your Password";
