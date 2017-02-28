@@ -89,8 +89,9 @@
 ###Devices<br/>
 1. Get Devices:<br/>
 > Route: http://0.0.0.0:0000/devices/ <br/>
-> HTTP Verb: GET <br/>
+> HTTP Verb: POST <br/>
 > Authentication: Auth Header
+> JSON req: {hubID: "xxx"}<br/>
 > JSON res: {result: 0/1, error: "xxx", devices: {device}}<br/>
 
 2. Get Specific Device:<br/>

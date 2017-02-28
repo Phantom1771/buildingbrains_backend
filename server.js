@@ -92,6 +92,8 @@ server.get('/hubs/', hubController.getAll);
 server.post('/devices/register', deviceController.postRegister);
 server.post('/devices/nearby', deviceController.postNearby);
 server.post('/devices/add', deviceController.postAdd);
+server.post('/devices/', deviceController.postAll);
+server.get('/devices/:deviceID', deviceController.getDevice);
 
 /**
  * Error Handler.

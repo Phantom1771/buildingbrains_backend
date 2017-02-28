@@ -7,12 +7,47 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
 /* 1.
- * GET devices/
- * Return all of users devices
+ * POST devices/
+ * Return all of users devices on a hub
  * Authentication: Auth Header
+ * JSON req: {hubID: "xxx"}
  * JSON res: {result: 0/1, error: "xxx", devices: {device}}
  */
-exports.getAll = (req, res) => {};
+exports.postAll = (req, res) => {
+  console.log("postAll \n",req.body);
+
+  req.assert('hubID', 'hubID is empty').notEmpty();
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    return res.json({result:1, error:errors});
+  }
+
+  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+  if(token){
+    // verifies secret and checks exp
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
+      else { // if everything is good
+        user = decoded._doc;
+
+        Device.find({ hub: req.body.hubID, registered: true}, (err, existingDevices) => {
+          if (existingDevices){
+            res.json({result: 0, error: "", devices: existingDevices})
+          }
+          else{
+            res.json({result: 1, error: "Hub not found"})
+          }
+        });
+      }
+    });
+  }
+  else{ // if there is no token return an error
+    return res.json({ result: 1, error: 'No token provided.' });
+  }
+};
 
 /* 2.
  * GET devices/deviceID
@@ -20,7 +55,39 @@ exports.getAll = (req, res) => {};
  * Authentication: Auth Header
  * JSON res: {result: 0/1, error: "xxx", device: {device}}
  */
-exports.getDevice = (req, res) => {};
+exports.getDevice = (req, res) => {
+  console.log("getDevice \n",req.body);
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    return res.json({result:1, error:errors});
+  }
+
+  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+  if(token){
+    // verifies secret and checks exp
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
+      else { // if everything is good
+        user = decoded._doc;
+
+        Device.findOne({ _id: req.params.deviceID}, (err, existingDevice) => {
+          if (existingDevice){
+            res.json({result: 0, error: "", devices: existingDevice})
+          }
+          else{
+            res.json({result: 1, error: "Device not found"})
+          }
+        });
+      }
+    });
+  }
+  else{ // if there is no token return an error
+    return res.json({ result: 1, error: 'No token provided.' });
+  }
+};
 
 /* 3.
  * POST devices/nearby
