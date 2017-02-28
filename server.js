@@ -47,14 +47,13 @@ const server = express();
  */
 
 mongoose.Promise = global.Promise;
-//mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
-mongoose.connect(config.database);
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
 mongoose.connection.on('error', () => {
   console.log('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'));
   process.exit();
 });
 
-server.set('superSecret', config.secret);
+server.set('superSecret', process.env.SECRET);
 
 /**
  * Express configuration.
@@ -91,38 +90,6 @@ server.post('/users/reset/', userController.postReset);
 server.post('/users/account/', userController.postAccount);
 server.post('/users/account/profile/', userController.postUpdateProfile);
 server.post('/users/account/delete/', userController.postDeleteAccount);
-
-
-
-
-/*server.get('/users/test/', userController.getTest);
-
-server.get('/forgot', userController.getForgot);
-server.post('/forgot', userController.postForgot);
-server.get('/reset/:token', userController.getReset);
-server.get('/contact', contactController.getContact);
-server.post('/contact', contactController.postContact);
-/*server.get('/account', passportConfig.isAuthenticated, userController.getAccount);
-server.post('/account/profile', passportConfig.isAuthenticated, userController.postUpdateProfile);
-server.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
-server.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
-server.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
-*/
-/**
- * API examples routes.
- */
-server.get('/api', apiController.getApi);
-server.get('/api/stripe', apiController.getStripe);
-server.post('/api/stripe', apiController.postStripe);
-server.get('/api/twilio', apiController.getTwilio);
-server.post('/api/twilio', apiController.postTwilio);
-server.get('/api/clockwork', apiController.getClockwork);
-server.post('/api/clockwork', apiController.postClockwork);
-//server.get('/api/facebook', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getFacebook);
-server.get('/api/paypal', apiController.getPayPal);
-server.get('/api/paypal/success', apiController.getPayPalSuccess);
-server.get('/api/paypal/cancel', apiController.getPayPalCancel);
-
 
 /**
  * Error Handler.

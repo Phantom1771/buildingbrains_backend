@@ -8,10 +8,6 @@ var helper = require('sendgrid').mail;
 const config = require('../config');
 const bcrypt = require('bcrypt-nodejs');
 
-
-exports.getTest = (req, res) => {
-  res.json({Note:"Welcome BuildingBrain Team, Please use Restful API!"});
-};
 /* #1
  * POST users/signup/
  * Create a new local account.
@@ -51,7 +47,7 @@ exports.postSignup = (req, res) => {
     user.save((err) => {
       if (err) { return next(err); }
       // if user is saved, create a token
-          var token = jwt.sign(user, config.secret, {
+          var token = jwt.sign(user, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
           });
       return res.json({result:0,error:"", token});
@@ -86,7 +82,7 @@ exports.postLogin = (req, res) => {
       existingUser.comparePassword(req.body.password, function(err, isMatch) {
         if (isMatch) {
           // if user is found and password is right create a token
-          var token = jwt.sign(existingUser, config.secret, {
+          var token = jwt.sign(existingUser, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
           });
           return res.json({result:0, error:"", usertoken: token});
@@ -98,7 +94,7 @@ exports.postLogin = (req, res) => {
   });
 };
 
-/* #3 
+/* #3
  * POST /users/logout/
  * Log out.
  * JSON Req: { userToken:"xxx" }
@@ -109,11 +105,11 @@ exports.postLogout = (req, res) => {
   console.log("postLogout \n",req.body);
   // check header or url parameters or post parameters for token
   var token = req.body.userToken || req.query.userToken || req.headers['x-access-token'];
-  
+
   if(token){
     // verifies secret and checks exp
-    jwt.verify(token, config.secret, function(err, decoded) {      
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });} 
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
       else { // if everything is good, save to request for use in other routes
         console.log(decoded._doc.email);
         //req.decoded = decoded;
@@ -148,7 +144,7 @@ exports.postForgot = (req, res) => {
       return res.json({result:1, error:err});
     }
     if (existingUser) {
-      var token = jwt.sign(existingUser, config.secret, {
+      var token = jwt.sign(existingUser, process.env.SECRET, {
           expiresIn : 60*60 // expires in 1 hours
           });
       email_content = "<h3>Hi "+existingUser.lastname+", </h3> <p>We have received a request to reset your password. If you did not make the request, just ignore this email.<p><p>Otherwise, you can reset your password using this temp password: "+token+".<p></br> Thanks,</br>BuildingBrains Team"
@@ -195,15 +191,15 @@ exports.postReset = (req, res, next) => {
   var newPassword = bcrypt.hashSync(req.body.newPassword, salt);
 
   if(token){
-    jwt.verify(token, config.secret, function(err, decoded) {      
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.', passwordResetToken: ""});} 
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.', passwordResetToken: ""});}
       else{
         console.log(decoded._doc.email);
         console.log(newPassword);
         User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
           if (err) {return res.json({result:1, error:error, passwordResetToken: ""})}
           else{
-              var newToken = jwt.sign(existingUser, config.secret, {
+              var newToken = jwt.sign(existingUser, process.env.SECRET, {
               expiresIn : 60*60*24 // expires in 24 hours
             });
             return res.json({ result:0, error:"", passwordResetToken:newToken});
@@ -230,9 +226,9 @@ exports.postAccount = (req, res) => {
 
   if(token){
     // verifies secret and checks exp
-    jwt.verify(token, config.secret, function(err, decoded) {      
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });} 
-      else { 
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
+      else {
         console.log(decoded._doc.email);
         User.findOne({ email: decoded._doc.email }, (err, existingUser) => {
           if (err) {return res.json({result:1, error:err});}
@@ -256,21 +252,21 @@ exports.postAccount = (req, res) => {
  */
 
 exports.postUpdateProfile = (req, res, next) => {
-  
+
   console.log("postUpdateProfile \n",req.body);
 
   var token = req.body.userToken || req.query.userToken || req.headers['x-access-token'];
 
   if(token){
-    jwt.verify(token, config.secret, function(err, decoded) {      
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.'});} 
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.'});}
       else{
         console.log(decoded._doc.email);
         User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { firstname: req.body.firstName, lastname:req.body.lastName  }}, { multi: true }, (err, existingUser) => {
             console.log(existingUser);
           if (err) {return res.json({result:1, error:error})}
           else{
-            var newToken = jwt.sign(existingUser, config.secret, {
+            var newToken = jwt.sign(existingUser, process.env.SECRET, {
               expiresIn : 60*60*24 // expires in 24 hours
             });
             return res.json({result:0, error:"",token:newToken});
@@ -290,14 +286,14 @@ exports.postUpdateProfile = (req, res, next) => {
  * JSON res: {result: 0/1, error: "xxx"}
  */
 exports.postDeleteAccount = (req, res, next) => {
-  
+
   console.log("postDeleteAccount \n",req.body);
 
   var token = req.body.userToken || req.query.userToken || req.headers['x-access-token'];
 
   if(token){
-    jwt.verify(token, config.secret, function(err, decoded) {      
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.'});} 
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.'});}
       else{
         console.log(decoded._doc.email);
         User.remove({ email: decoded._doc.email }, function (err) {
@@ -311,196 +307,3 @@ exports.postDeleteAccount = (req, res, next) => {
   }
   else{return res.json({ result: 1, error: 'No token provided.'});}
 };
-
-/**
- * POST /account/delete
- * Delete user account.
- 
-exports.postDeleteAccount = (req, res, next) => {
-  User.remove({ _id: req.user.id }, (err) => {
-    if (err) { return next(err); }
-    req.logout();
-    req.flash('info', { msg: 'Your account has been deleted.' });
-    res.redirect('/');
-  });
-};
-
-/**
- * GET /account/unlink/:provider
- * Unlink OAuth provider.
-
-exports.getOauthUnlink = (req, res, next) => {
-  const provider = req.params.provider;
-  User.findById(req.user.id, (err, user) => {
-    if (err) { return next(err); }
-    user[provider] = undefined;
-    user.tokens = user.tokens.filter(token => token.kind !== provider);
-    user.save((err) => {
-      if (err) { return next(err); }
-      req.flash('info', { msg: `${provider} account has been unlinked.` });
-      res.redirect('/account');
-    });
-  });
-};
-
-/**
- * GET /reset/:token
- * Reset Password page.
- 
-exports.getReset = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return res.redirect('/');
-  }
-  User
-    .findOne({ passwordResetToken: req.params.token })
-    .where('passwordResetExpires').gt(Date.now())
-    .exec((err, user) => {
-      if (err) { return next(err); }
-      if (!user) {
-        req.flash('errors', { msg: 'Password reset token is invalid or has expired.' });
-        return res.redirect('/forgot');
-      }
-      res.render('account/reset', {
-        title: 'Password Reset'
-      });
-    });
-};
-
-/**
- * POST /reset/:token
- * Process the reset password request.
- 
-exports.postReset = (req, res, next) => {
-  req.assert('password', 'Password must be at least 4 characters long.').len(4);
-  req.assert('confirm', 'Passwords must match.').equals(req.body.password);
-
-  const errors = req.validationErrors();
-
-  if (errors) {
-    req.flash('errors', errors);
-    return res.redirect('back');
-  }
-
-  async.waterfall([
-    function resetPassword(done) {
-      User
-        .findOne({ passwordResetToken: req.params.token })
-        .where('passwordResetExpires').gt(Date.now())
-        .exec((err, user) => {
-          if (err) { return next(err); }
-          if (!user) {
-            req.flash('errors', { msg: 'Password reset token is invalid or has expired.' });
-            return res.redirect('back');
-          }
-          user.password = req.body.password;
-          user.passwordResetToken = undefined;
-          user.passwordResetExpires = undefined;
-          user.save((err) => {
-            if (err) { return next(err); }
-            req.logIn(user, (err) => {
-              done(err, user);
-            });
-          });
-        });
-    },
-    function sendResetPasswordEmail(user, done) {
-      const transporter = nodemailer.createTransport({
-        service: 'SendGrid',
-        auth: {
-          user: process.env.SENDGRID_USER,
-          pass: process.env.SENDGRID_PASSWORD
-        }
-      });
-      const mailOptions = {
-        to: user.email,
-        from: 'hackathon@starter.com',
-        subject: 'Your Hackathon Starter password has been changed',
-        text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`
-      };
-      transporter.sendMail(mailOptions, (err) => {
-        req.flash('success', { msg: 'Success! Your password has been changed.' });
-        done(err);
-      });
-    }
-  ], (err) => {
-    if (err) { return next(err); }
-    return 
-  });
-};
-
-/**
- * GET /forgot
- * Forgot Password page.
- *==
-exports.getForgot = (req, res) => {
-  if (req.isAuthenticated()) {
-    return res.redirect('/');
-  }
-  res.render('account/forgot', {
-    title: 'Forgot Password'
-  });
-};
-
-/**
- * POST /forgot
- * Create a random token, then the send user an email with a reset link.
- 
-exports.postForgot = (req, res, next) => {
-  req.assert('email', 'Please enter a valid email address.').isEmail();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
-
-  const errors = req.validationErrors();
-
-  if (errors) {
-    req.flash('errors', errors);
-    return res.redirect('/forgot');
-  }
-
-  async.waterfall([
-    function createRandomToken(done) {
-      crypto.randomBytes(16, (err, buf) => {
-        const token = buf.toString('hex');
-        done(err, token);
-      });
-    },
-    function setRandomToken(token, done) {
-      User.findOne({ email: req.body.email }, (err, user) => {
-        if (err) { return done(err); }
-        if (!user) {
-          req.flash('errors', { msg: 'Account with that email address does not exist.' });
-          return res.redirect('/forgot');
-        }
-        user.passwordResetToken = token;
-        user.passwordResetExpires = Date.now() + 3600000; // 1 hour
-        user.save((err) => {
-          done(err, token, user);
-        });
-      });
-    },
-    function sendForgotPasswordEmail(token, user, done) {
-      const transporter = nodemailer.createTransport({
-        service: 'SendGrid',
-        auth: {
-          user: process.env.SENDGRID_USER,
-          pass: process.env.SENDGRID_PASSWORD
-        }
-      });
-      const mailOptions = {
-        to: user.email,
-        from: 'hackathon@starter.com',
-        subject: 'Reset your password on Hackathon Starter',
-        text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
-          Please click on the following link, or paste this into your browser to complete the process:\n\n
-          http://${req.headers.host}/reset/${token}\n\n
-          If you did not request this, please ignore this email and your password will remain unchanged.\n`
-      };
-      transporter.sendMail(mailOptions, (err) => {
-        req.flash('info', { msg: `An e-mail has been sent to ${user.email} with further instructions.` });
-        done(err);
-      });
-    }
-  ], (err) => {
-    if (err) { return next(err); }
-    res.redirect('/forgot');
-  });
-};*/
