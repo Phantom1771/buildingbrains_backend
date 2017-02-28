@@ -15,10 +15,10 @@ const dotenv = require('dotenv');
 const flash = require('express-flash');
 const path = require('path');
 const mongoose = require('mongoose');
-const passport = require('passport');
+//const passport = require('passport');
 const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
-const sass = require('node-sass-middleware');
+//const sass = require('node-sass-middleware');
 const multer = require('multer');
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 const config = require('./config');
@@ -47,14 +47,13 @@ const server = express();
  */
 
 mongoose.Promise = global.Promise;
-//mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
-mongoose.connect(config.database);
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
 mongoose.connection.on('error', () => {
   console.log('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'));
   process.exit();
 });
 
-server.set('superSecret', config.secret); 
+server.set('superSecret', process.env.SECRET);
 
 /**
  * Express configuration.
@@ -64,52 +63,33 @@ server.set('port', process.env.PORT || 3000);
 //server.set('view engine', 'pug');
 server.use(expressStatusMonitor());
 server.use(compression());
-server.use(sass({
+/*server.use(sass({
   src: path.join(__dirname, 'public'),
   dest: path.join(__dirname, 'public')
-}));
+}));*/
 server.use(logger('dev'));
 server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: false }));
+server.use(bodyParser.urlencoded({ extended: true }));
 server.use(expressValidator());
+server.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 /**
  * Primary server routes.
  */
 //User
+server.get('/', userController.getTest);
 server.post('/users/signup/', userController.postSignup);
 server.post('/users/login/', userController.postLogin);
 server.post('/users/logout/', userController.postLogout);
-
-//server.get('/users/test/', userController.getTest);
-
-server.get('/forgot', userController.getForgot);
-server.post('/forgot', userController.postForgot);
-server.get('/reset/:token', userController.getReset);
-server.post('/reset/:token', userController.postReset);
-server.get('/contact', contactController.getContact);
-server.post('/contact', contactController.postContact);
-/*server.get('/account', passportConfig.isAuthenticated, userController.getAccount);
-server.post('/account/profile', passportConfig.isAuthenticated, userController.postUpdateProfile);
-server.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
-server.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
-server.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
-*/
-/**
- * API examples routes.
- */
-server.get('/api', apiController.getApi);
-server.get('/api/stripe', apiController.getStripe);
-server.post('/api/stripe', apiController.postStripe);
-server.get('/api/twilio', apiController.getTwilio);
-server.post('/api/twilio', apiController.postTwilio);
-server.get('/api/clockwork', apiController.getClockwork);
-server.post('/api/clockwork', apiController.postClockwork);
-//server.get('/api/facebook', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getFacebook);
-server.get('/api/paypal', apiController.getPayPal);
-server.get('/api/paypal/success', apiController.getPayPalSuccess);
-server.get('/api/paypal/cancel', apiController.getPayPalCancel);
-
+server.post('/users/forgot/', userController.postForgot);
+server.post('/users/reset/', userController.postReset);
+server.post('/users/account/', userController.postAccount);
+server.post('/users/account/profile/', userController.postUpdateProfile);
+server.post('/users/account/delete/', userController.postDeleteAccount);
 
 /**
  * Error Handler.
