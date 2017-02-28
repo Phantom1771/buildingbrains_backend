@@ -1,11 +1,9 @@
 const async = require('async');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const passport = require('passport');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-var helper = require('sendgrid').mail;
-const config = require('../config');
+const helper = require('sendgrid').mail;
 const bcrypt = require('bcrypt-nodejs');
 
 /* #1
