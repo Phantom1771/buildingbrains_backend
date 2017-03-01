@@ -13,8 +13,6 @@ const dotenv = require('dotenv');
  * JSON res: {result: 0/1, error: "xxx"}
  */
 exports.postAdd = (req, res) => {
-  console.log("postAdd \n",req.body);
-
   req.assert('hubCode', 'hubCode is empty').notEmpty();
   req.assert('hubName', 'Name is empty').notEmpty();
 
@@ -86,8 +84,6 @@ exports.postAdd = (req, res) => {
   * JSON res: {result: 0/1, error: "xxx"}<br/>
   */
 exports.postDelete = (req, res) => {
-  console.log("postDelete \n",req.body);
-
   req.assert('hubID', 'hubID is empty').notEmpty();
 
   const errors = req.validationErrors();
@@ -149,8 +145,6 @@ exports.postDelete = (req, res) => {
  * JSON res: {result: 0/1, error: "xxx", hubs: {hub}}
  */
 exports.getAll = (req, res) => {
-  console.log("getAll \n", req.body);
-
   const errors = req.validationErrors();
 
   if (errors) {
@@ -168,10 +162,10 @@ exports.getAll = (req, res) => {
 
         User.findOne({ _id:user._id}, (err, existingUser) => {
           if(existingUser){
-            return res.json({ result: 0, errors: "", hubs: existingUser.hubs})
+            return res.json({ result: 0, error: "", hubs: existingUser.hubs})
           }
           else{
-            return res.json({ result: 1, errors: "User not found"});
+            return res.json({ result: 1, error: "User not found"});
           }
         });
       }
@@ -192,9 +186,6 @@ exports.getAll = (req, res) => {
  * JSON res: {result: 0/1, error: "xxx"}
  */
 exports.postRegister = (req, res) => {
-
-  console.log("postRegister \n",req.body);
-
   req.assert('address', 'Address is empty').notEmpty();
   req.assert('hubCode', 'hubCode is empty').notEmpty();
 

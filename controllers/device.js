@@ -14,8 +14,6 @@ const dotenv = require('dotenv');
  * JSON res: {result: 0/1, error: "xxx", devices: {device}}
  */
 exports.postAll = (req, res) => {
-  console.log("postAll \n",req.body);
-
   req.assert('hubID', 'hubID is empty').notEmpty();
 
   const errors = req.validationErrors();
@@ -56,8 +54,6 @@ exports.postAll = (req, res) => {
  * JSON res: {result: 0/1, error: "xxx", device: {device}}
  */
 exports.getDevice = (req, res) => {
-  console.log("getDevice \n",req.body);
-
   const errors = req.validationErrors();
 
   if (errors) {
@@ -97,8 +93,6 @@ exports.getDevice = (req, res) => {
  * JSON res: {result: 0/1, error: "xxx", devices: {device}}
  */
 exports.postNearby = (req, res) => {
-  console.log("postNearby \n",req.body);
-
   const errors = req.validationErrors();
 
   if (errors) {
@@ -138,8 +132,6 @@ exports.postNearby = (req, res) => {
  * JSON res: {result: 0/1, error: "xxx"}
  */
  exports.postAdd = (req, res) => {
-   console.log("postAdd \n",req.body);
-
    req.assert('hubID', 'hubID is empty').notEmpty();
    req.assert('deviceID', 'deviceID is empty').notEmpty();
    req.assert('deviceName', 'deviceName is empty').notEmpty();
@@ -225,9 +217,6 @@ exports.postNearby = (req, res) => {
   * JSON res: {result: 0/1, error: "xxx"}
   */
   exports.postRegister = (req, res) => {
-
-    console.log("postRegister \n",req.body);
-
     req.assert('deviceLink', 'deviceLink is empty').notEmpty();
     req.assert('hubCode', 'hubCode is empty').notEmpty();
 

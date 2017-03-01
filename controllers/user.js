@@ -13,9 +13,6 @@ const dotenv = require('dotenv');
  * JSON Res: { result: 0/1, error:"xxx", userToken:"xxx"}
  */
 exports.postSignup = (req, res) => {
-
-  console.log("postSignup \n",req.body);
-
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
   req.sanitize('email').normalizeEmail({ remove_dots: false });
@@ -60,9 +57,6 @@ exports.postSignup = (req, res) => {
  * JSON Res: { result: 0/1, error:"xxx", userToken: "xxx"}
  */
 exports.postLogin = (req, res) => {
-
-  console.log("postLogin \n",req.body);
-
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
   req.sanitize('email').normalizeEmail({ remove_dots: false });
@@ -83,7 +77,7 @@ exports.postLogin = (req, res) => {
           var token = jwt.sign(existingUser, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
           });
-          return res.json({result:0, error:"", usertoken: token});
+          return res.json({result:0, error:"", userToken: token});
         }
           return res.json({result:1, error:"Password incorrect!"});
     });
@@ -95,18 +89,16 @@ exports.postLogin = (req, res) => {
 /** #3
  * POST /users/logout/
  * Log out.
- * JSON Req: { userToken:"xxx" }
+ * Authentication: Auth Header
+ * JSON Req: {}
  * JSON Res: { result: 0/1, error:"xxx" }
  */
 exports.postLogout = (req, res) => {
-
-  console.log("postLogout \n",req.body);
-  // check header or url parameters or post parameters for token
   var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
   if(token){
     // verifies secret and checks exp
-    jwt.verify(token, config.secret, function(err, decoded) {
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
       else { // if everything is good, save to request for use in other routes
         req.decoded = decoded;

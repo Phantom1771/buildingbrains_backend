@@ -25,7 +25,6 @@ dotenv.load({ path: '.env.example' });
  */
 const userController = require('./controllers/user');
 const hubController = require('./controllers/hub');
-const contactController = require('./controllers/contact');
 const deviceController = require('./controllers/device');
 
 /**
@@ -75,12 +74,9 @@ server.post('/users/login', userController.postLogin);
 server.post('/users/logout', userController.postLogout);
 server.post('/users/forgot', userController.postForgot);
 server.post('/users/reset', userController.postReset);
-server.post('/account/profile', userController.postUpdateProfile);
-server.post('/account/password', userController.postUpdatePassword);
-server.post('/account/delete', userController.postDeleteAccount)
-
-//Contact
-server.post('/contact', contactController.postContact);
+server.post('/users/account/profile', userController.postUpdateProfile);
+server.post('/users/account/password', userController.postUpdatePassword);
+server.post('/users/account/delete', userController.postDeleteAccount)
 
 //Hub
 server.post('/hubs/register', hubController.postRegister);
@@ -99,7 +95,6 @@ server.get('/devices/:deviceID', deviceController.getDevice);
  * Error Handler.
  */
 server.use(errorHandler());
-
 
 /**
  * Start Express server.
