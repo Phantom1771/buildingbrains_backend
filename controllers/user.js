@@ -83,7 +83,7 @@ exports.postLogin = (req, res) => {
           var token = jwt.sign(existingUser, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
           });
-          return res.json({result:0, error:"", usertoken: token});
+          return res.json({result:0, error:"", userToken: token});
         }
           return res.json({result:1, error:"Password incorrect!"});
     });
@@ -175,7 +175,7 @@ exports.postForgot = (req, res) => {
 /**
  * POST /users/reset/
  * Reset password
- * JSON Req: {newPassword:"xxx",usertoken:"xxx"}
+ * JSON Req: {newPassword:"xxx",userToken:"xxx"}
  * JSON res: {result: 0/1, error: "xxx", passwordResetToken: "xxx"}
 */
 exports.postReset = (req, res, next) => {
