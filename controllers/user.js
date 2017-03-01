@@ -48,7 +48,7 @@ exports.postSignup = (req, res) => {
           var token = jwt.sign(user, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
           });
-      return res.json({result:0,error:"", token});
+      return res.json({result:0,error:"", userToken: token});
     });
   });
 };
