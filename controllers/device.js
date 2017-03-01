@@ -5,6 +5,7 @@ const Hub = require('../models/Hub');
 const Device = require('../models/Device');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const request = require('request');
 
 /* 1.
  * POST devices/
@@ -33,10 +34,20 @@ exports.postAll = (req, res) => {
 
         Device.find({ hub: req.body.hubID, registered: true}, (err, existingDevices) => {
           if (existingDevices){
-            res.json({result: 0, error: "", devices: existingDevices})
+            for(var i=0; i < existingDevices.length; i++){
+              request.get(existingDevices[i].link).on('response', function(response) {
+                existingDevices[i].state = response.state;
+
+                existingDevices[i].save((err) => {
+                  if (err) { return res.json({result:1, error:err}); }
+                  return res.json({result:0, error:"", devices: existingDevice});
+                });
+              });
+            }
+            res.json({result: 0, error: "", devices: existingDevices});
           }
           else{
-            res.json({result: 1, error: "Hub not found"})
+            res.json({result: 1, error: "Hub not found"});
           }
         });
       }
@@ -71,10 +82,17 @@ exports.getDevice = (req, res) => {
 
         Device.findOne({ _id: req.params.deviceID}, (err, existingDevice) => {
           if (existingDevice){
-            res.json({result: 0, error: "", devices: existingDevice})
+            request.get(existingDevice.link).on('response', function(response) {
+              existingDevice.state = response.state;
+
+              existingDevice.save((err) => {
+                if (err) { return res.json({result:1, error:err}); }
+                return res.json({result:0, error:"", devices: existingDevice});
+              });
+            });
           }
           else{
-            res.json({result: 1, error: "Device not found"})
+            res.json({result: 1, error: "Device not found"});
           }
         });
       }
@@ -113,7 +131,7 @@ exports.postNearby = (req, res) => {
             res.json({result: 0, error: "", devices: existingDevices})
           }
           else{
-            res.json({result: 1, error: "Hub not found"})
+            res.json({result: 1, error: "Hub not found"});
           }
         });
       }
@@ -157,6 +175,36 @@ exports.postNearby = (req, res) => {
            }
 
            if (existingDevice){
+             //Update device info
+             request.get(existingDevice.link).on('response', function(response) {
+               existingDevice.state = response.state;
+               existingDevice.category = response.category;
+               existingDevice.type = response.type;
+
+               if(existingDevice.type == "Switch"){
+                 existingDevice.params = ["on","off"];
+               }
+               else if(existingDevice.type == "Dimmer"){
+                 existingDevice.params = ["percent"];
+               }
+               else if(existingDevice.type == "Color"){
+                 existingDevice.params = ["float,float,float"]
+               }
+               else if(existingDevice.type == "Number"){
+                 existingDevice.params = ["float"];
+               }
+               else if(existingDevice.type == "Contact"){
+                 existingDevice.params = ["open", "closed"];
+               }
+               else{
+                 existingDevice.params = [];
+               }
+
+               existingDevice.save((err) => {
+                 if (err) { return res.json({result:1, error:err}); }
+               });
+             });
+            //Then add to hub
              Hub.findOne({ _id:req.body.hubID}, (err, existingHub) => {
                if (err) {
                  return res.json({result:1, error:error});
@@ -174,12 +222,15 @@ exports.postNearby = (req, res) => {
 
                  existingHub.save();
 
-                 return res.json({result:0, error:"", hub: existingHub});
+                 return res.json({result:0, error:""});
                }
                else{
-                 return res.json({result:1, error:"A hub matching this hubCode could not be found."});
+                 return res.json({result:1, error:"A hub matching this hubID could not be found."});
                }
              });
+           }
+           else{
+             return res.json({result:1, error:"A device matching this deviceID could not be found."});
            }
          });
        }
@@ -206,7 +257,61 @@ exports.postNearby = (req, res) => {
  * JSON req: {hubID: "xxx", deviceID: "xxx"}
  * JSON res: {result: 0/1, error: "xxx"}
  */
- exports.postDelete = (req, res) => {};
+ exports.postDelete = (req, res) => {
+   req.assert('hubID', 'hubID is empty').notEmpty();
+   req.assert('deviceID', 'deviceID is empty').notEmpty();
+
+   const errors = req.validationErrors();
+
+   if (errors) {
+     return res.json({result:1, error:errors});
+   }
+
+   var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+   if(token){
+     // verifies secret and checks exp
+     jwt.verify(token, process.env.SECRET, function(err, decoded) {
+       if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
+       else { // if everything is good
+         user = decoded._doc;
+
+         Device.findOne({_id: req.body.deviceID}, (err, existingDevice) => {
+           if (err) {
+             return res.json({result:1, error:error});
+           }
+
+           if (existingDevice){
+            //Then add to hub
+             Hub.findOne({ _id:req.body.hubID}, (err, existingHub) => {
+               if (err) {
+                 return res.json({result:1, error:error});
+               }
+
+               if (existingHub) {
+                 existingHub.devices.pull(existingDevice);
+
+                 existingHub.save();
+
+                 return res.json({result:0, error:""});
+               }
+               else{
+                 return res.json({result:1, error:"A hub matching this hubID could not be found."});
+               }
+             });
+           }
+           else{
+             return res.json({result:1, error:"A device matching this deviceID could not be found."});
+           }
+         });
+       }
+     });
+   }
+   else{ // if there is no token return an error
+     return res.json({ result: 1, error: 'No token provided.' });
+   }
+ };
+
 
  /* 7.
   * POST devices/register

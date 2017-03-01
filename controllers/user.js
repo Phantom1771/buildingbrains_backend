@@ -102,7 +102,6 @@ exports.postLogout = (req, res) => {
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
       else { // if everything is good, save to request for use in other routes
-        console.log(decoded._doc.email);
         //req.decoded = decoded;
         return res.json({ result: 0, error: '' });
       }
@@ -177,8 +176,6 @@ exports.postReset = (req, res, next) => {
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.', passwordResetToken: ""});}
       else{
-        console.log(decoded._doc.email);
-        console.log(newPassword);
         User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
           if (err) {return res.json({result:1, error:error, passwordResetToken: ""})}
           else{
@@ -211,10 +208,8 @@ exports.postAccount = (req, res) => {
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
       else {
-        console.log(decoded._doc.email);
         User.findOne({ email: decoded._doc.email }, (err, existingUser) => {
           if (err) {return res.json({result:1, error:err});}
-          console.log(existingUser);
           if (existingUser) {
             return res.json({ result: 0, email:existingUser.email, firstname:existingUser.firstname, lastname:existingUser.lastname, hubs:existingUser.hubs});
           }
@@ -241,9 +236,7 @@ exports.postUpdateProfile = (req, res, next) => {
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.'});}
       else{
-        console.log(decoded._doc.email);
         User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { firstname: req.body.firstName, lastname:req.body.lastName  }}, { multi: true }, (err, existingUser) => {
-            console.log(existingUser);
           if (err) {return res.json({result:1, error:error})}
           else{
             var newToken = jwt.sign(existingUser, process.env.SECRET, {
@@ -273,7 +266,6 @@ exports.postDeleteAccount = (req, res, next) => {
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.'});}
       else{
-        console.log(decoded._doc.email);
         User.remove({ email: decoded._doc.email }, function (err) {
           if(err)  {return res.json({ result: 1, error:err});}
           else     {return res.json({ result: 0, error:""});}
