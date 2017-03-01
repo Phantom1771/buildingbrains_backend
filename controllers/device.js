@@ -9,7 +9,7 @@ const dotenv = require('dotenv');
 /* 1.
  * POST devices/
  * Return all of users devices on a hub
- * Authentication: Auth Header
+ * Authentication: header: x-access-token
  * JSON req: {hubID: "xxx"}
  * JSON res: {result: 0/1, error: "xxx", devices: {device}}
  */
@@ -50,7 +50,7 @@ exports.postAll = (req, res) => {
 /* 2.
  * GET devices/deviceID
  * Return status of device
- * Authentication: Auth Header
+ * Authentication: header: x-access-token
  * JSON res: {result: 0/1, error: "xxx", device: {device}}
  */
 exports.getDevice = (req, res) => {
@@ -88,7 +88,7 @@ exports.getDevice = (req, res) => {
 /* 3.
  * POST devices/nearby
  * Returns list of unregistered nearby devices
- * Authentication: Auth Header
+ * Authentication: header: x-access-token
  * JSON req: {hubID: "xxx"}
  * JSON res: {result: 0/1, error: "xxx", devices: {device}}
  */
@@ -127,7 +127,7 @@ exports.postNearby = (req, res) => {
 /* 4.
  * POST devices/add
  * Adds a device to a users hub
- * Authentication: Auth Header
+ * Authentication: header: x-access-token
  * JSON req: {hubID: "xxx", deviceID: "xxx", deviceName: "xxx"}
  * JSON res: {result: 0/1, error: "xxx"}
  */
@@ -193,7 +193,7 @@ exports.postNearby = (req, res) => {
 /* 5.
  * POST devices/update
  * Updates the device status
- * Authentication: Auth Header
+ * Authentication: header: x-access-token
  * JSON req: {hubID: "xxx", deviceID: "xxx", deviceSettings: {settings}}
  * JSON res: {result: 0/1, error: "xxx"}
  */
@@ -202,7 +202,7 @@ exports.postNearby = (req, res) => {
 /* 6.
  * POST devices/delete
  * Delete device from a users hub
- * Authentication: Auth Header
+ * Authentication: header: x-access-token
  * JSON req: {hubID: "xxx", deviceID: "xxx"}
  * JSON res: {result: 0/1, error: "xxx"}
  */

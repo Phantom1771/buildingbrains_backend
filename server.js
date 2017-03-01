@@ -69,14 +69,14 @@ server.use(function(req, res, next) {
  * Primary server routes.
  */
 //User
-server.post('/users/signup', userController.postSignup);
-server.post('/users/login', userController.postLogin);
-server.post('/users/logout', userController.postLogout);
-server.post('/users/forgot', userController.postForgot);
-server.post('/users/reset', userController.postReset);
-server.post('/users/account/profile', userController.postUpdateProfile);
-server.post('/users/account/password', userController.postUpdatePassword);
-server.post('/users/account/delete', userController.postDeleteAccount)
+server.post('/users/signup/', userController.postSignup);
+server.post('/users/login/', userController.postLogin);
+server.post('/users/logout/', userController.postLogout);
+server.post('/users/forgot/', userController.postForgot);
+server.post('/users/reset/', userController.postReset);
+server.post('/users/account/', userController.postAccount);
+server.post('/users/account/profile/', userController.postUpdateProfile);
+server.post('/users/account/delete/', userController.postDeleteAccount);
 
 //Hub
 server.post('/hubs/register', hubController.postRegister);
