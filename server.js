@@ -77,7 +77,7 @@ server.post('/users/login/', userController.postLogin);
 server.post('/users/logout/', userController.postLogout);
 server.post('/users/forgot/', userController.postForgot);
 server.post('/users/reset/', userController.postReset);
-server.post('/users/account/', userController.postAccount);
+server.get('/users/account/', userController.getAccount);
 server.post('/users/account/profile/', userController.postUpdateProfile);
 server.post('/users/account/delete/', userController.postDeleteAccount);
 
