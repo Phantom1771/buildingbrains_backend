@@ -1,32 +1,32 @@
-const mongoose = require('mongoose');
-const chai = require('chai');
-const chaiHttp = require('chai-http');
+const mongoose = require('mongoose')
+const chai = require('chai')
+const chaiHttp = require('chai-http')
 const server = require('../server')
-const should = chai.should();
+const should = chai.should()
 
-const User = require('../models/User');
-const Hub = require('../models/Hub');
+const User = require('../models/User')
+const Hub = require('../models/Hub')
 
-chai.use(chaiHttp);
+chai.use(chaiHttp)
 
-var userToken = "";
-var hubCode1 = "testHubCode1";
-var hubCode2 = "testHubCode2";
-var hubID1 = "";
-var hubID2 = "";
+var userToken = ""
+var hubCode1 = "testHubCode1"
+var hubCode2 = "testHubCode2"
+var hubID1 = ""
+var hubID2 = ""
 
 
 describe('Create/Login/Logout User', () => {
   before((done) => {
       User.remove({}, (err) => {
-         done();
-      });
-  });
+         done()
+      })
+  })
   before((done) => {
       Hub.remove({}, (err) => {
-         done();
-      });
-  });
+         done()
+      })
+  })
 
   it('should create a new User', (done) => {
     let req = {
@@ -39,14 +39,14 @@ describe('Create/Login/Logout User', () => {
       .post('/users/signup')
       .send(req)
       .end((err, res) => {
-         res.should.have.status(200);
-         res.body.should.be.a('object');
-         res.body.should.have.property('result').eql(0);
-         res.body.should.have.property('userToken');
-         userToken = res.body.userToken;
-         done();
-      });
-   });
+         res.should.have.status(200)
+         res.body.should.be.a('object')
+         res.body.should.have.property('result').eql(0)
+         res.body.should.have.property('userToken')
+         userToken = res.body.userToken
+         done()
+      })
+   })
 
    it('should logout a User', (done) => {
      let req = {}
@@ -55,12 +55,12 @@ describe('Create/Login/Logout User', () => {
        .set('x-access-token', userToken)
        .send(req)
        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('result').eql(0);
-          done();
-       });
-   });
+          res.should.have.status(200)
+          res.body.should.be.a('object')
+          res.body.should.have.property('result').eql(0)
+          done()
+       })
+   })
 
    it('should login a User', (done) => {
      let req = {
@@ -72,15 +72,15 @@ describe('Create/Login/Logout User', () => {
        .set('x-access-token', userToken)
        .send(req)
        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('result').eql(0);
-          res.body.should.have.property('userToken');
-          userToken = res.body.userToken;
-          done();
-       });
-   });
-});
+          res.should.have.status(200)
+          res.body.should.be.a('object')
+          res.body.should.have.property('result').eql(0)
+          res.body.should.have.property('userToken')
+          userToken = res.body.userToken
+          done()
+       })
+   })
+})
 
 describe('Register/Add/GetAll/Delete Hub', () => {
   //Register 2 Hubs
@@ -93,13 +93,13 @@ describe('Register/Add/GetAll/Delete Hub', () => {
      .post('/hubs/register')
      .send(req)
      .end((err, res) => {
-         res.should.have.status(200);
-         res.body.should.be.a('object');
-         res.body.should.have.property('result').eql(0);
-         res.body.should.have.property('error').eql("");
-         done();
-     });
-  });
+         res.should.have.status(200)
+         res.body.should.be.a('object')
+         res.body.should.have.property('result').eql(0)
+         res.body.should.have.property('error').eql("")
+         done()
+     })
+  })
 
   it('should register a second new Hub with the server', (done) => {
     let req = {
@@ -110,13 +110,13 @@ describe('Register/Add/GetAll/Delete Hub', () => {
      .post('/hubs/register')
      .send(req)
      .end((err, res) => {
-         res.should.have.status(200);
-         res.body.should.be.a('object');
-         res.body.should.have.property('result').eql(0);
-         res.body.should.have.property('error').eql("");
-         done();
-     });
-  });
+         res.should.have.status(200)
+         res.body.should.be.a('object')
+         res.body.should.have.property('result').eql(0)
+         res.body.should.have.property('error').eql("")
+         done()
+     })
+  })
 
   //Add two hubs to a user
   it('should add a registed Hub to a User', (done) => {
@@ -129,13 +129,13 @@ describe('Register/Add/GetAll/Delete Hub', () => {
      .set('x-access-token', userToken)
      .send(req)
      .end((err, res) => {
-       res.should.have.status(200);
-       res.body.should.be.a('object');
-       res.body.should.have.property('result').eql(0);
-       res.body.should.have.property('error').eql("");
-       done();
-     });
-  });
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       done()
+     })
+  })
 
   it('should add a second registed Hub to a User', (done) => {
     let req = {
@@ -147,27 +147,27 @@ describe('Register/Add/GetAll/Delete Hub', () => {
      .set('x-access-token', userToken)
      .send(req)
      .end((err, res) => {
-       res.should.have.status(200);
-       res.body.should.be.a('object');
-       res.body.should.have.property('result').eql(0);
-       res.body.should.have.property('error').eql("");
-       done();
-     });
-  });
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       done()
+     })
+  })
 
   it('should retrieve list of hubs', (done) => {
     chai.request(server)
      .get('/hubs/')
      .set('x-access-token', userToken)
      .end((err, res) => {
-       res.should.have.status(200);
-       res.body.should.be.a('object');
-       res.body.should.have.property('result').eql(0);
-       res.body.should.have.property('error').eql("");
-       res.body.should.have.property('hubs');
-       hubID1 = res.body.hubs[0];
-       hubID2 = res.body.hubs[1];
-       done();
-     });
-  });
-});
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       res.body.should.have.property('hubs')
+       hubID1 = res.body.hubs[0]
+       hubID2 = res.body.hubs[1]
+       done()
+     })
+  })
+})

@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt-nodejs');
-const crypto = require('crypto');
-const mongoose = require('mongoose');
+const bcrypt = require('bcrypt-nodejs')
+const crypto = require('crypto')
+const mongoose = require('mongoose')
 
 const hubSchema = new mongoose.Schema({
   name: String,
@@ -10,7 +10,7 @@ const hubSchema = new mongoose.Schema({
   devices: [{type: mongoose.Schema.Types.ObjectId, ref: 'Device'}],
   groups: [{type: mongoose.Schema.Types.ObjectId, ref: 'Group'}],
   automations: [{type: mongoose.Schema.Types.ObjectId, ref: 'Automation'}]
-}, { timestamps: true });
+}, { timestamps: true })
 
-const Hub = mongoose.model('Hub', hubSchema);
-module.exports = Hub;
+const Hub = mongoose.model('Hub', hubSchema)
+module.exports = Hub
