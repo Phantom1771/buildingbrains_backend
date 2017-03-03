@@ -193,7 +193,7 @@ exports.postReset = (req, res, next) => {
 };
 
 /**
- * POST users/account/
+ * GET users/account/
  * Return account info
  * Authentication: header: x-access-token
  * JSON req: {}

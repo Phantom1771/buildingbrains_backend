@@ -35,12 +35,14 @@ exports.postAll = (req, res) => {
         Device.find({ hub: req.body.hubID, registered: true}, (err, existingDevices) => {
           if (existingDevices){
             for(var i=0; i < existingDevices.length; i++){
-              request.get(existingDevices[i].link).on('response', function(response) {
-                existingDevices[i].state = response.state;
-
-                existingDevices[i].save((err) => {
-                  if (err) { return res.json({result:1, error:err}); }
-                  return res.json({result:0, error:"", devices: existingDevice});
+              Device.findOne({ _id: existingDevices[i]._id}, (err, existingDevice) => {
+                request.get(existingDevice.link, function(err, response, body) {
+                  console.log(JSON.parse(body).state);
+                  existingDevice.state = JSON.parse(body).state;
+                  existingDevice.save((err) => {
+                    if (err) { return res.json({result:1, error:err}); }
+                  });
+                  console.log(existingDevice);
                 });
               });
             }
@@ -82,8 +84,8 @@ exports.getDevice = (req, res) => {
 
         Device.findOne({ _id: req.params.deviceID}, (err, existingDevice) => {
           if (existingDevice){
-            request.get(existingDevice.link).on('response', function(response) {
-              existingDevice.state = response.state;
+            request.get(existingDevice.link, function(err, response, body) {
+              existingDevice.state = JSON.parse(body).state;
 
               existingDevice.save((err) => {
                 if (err) { return res.json({result:1, error:err}); }
@@ -169,17 +171,18 @@ exports.postNearby = (req, res) => {
        else { // if everything is good
          user = decoded._doc;
 
-         Device.findOne({_id: req.body.deviceID}, (err, existingDevice) => {
+         Device.findOne({_id: req.body.deviceID, registered: false}, (err, existingDevice) => {
            if (err) {
              return res.json({result:1, error:error});
            }
 
            if (existingDevice){
              //Update device info
-             request.get(existingDevice.link).on('response', function(response) {
-               existingDevice.state = response.state;
-               existingDevice.category = response.category;
-               existingDevice.type = response.type;
+             request.get(existingDevice.link, function(err, response, body) {
+               console.log(body);
+               existingDevice.state = JSON.parse(body).state;
+               existingDevice.category = JSON.parse(body).category;
+               existingDevice.type = JSON.parse(body).type;
 
                if(existingDevice.type == "Switch"){
                  existingDevice.params = ["on","off"];
@@ -230,7 +233,7 @@ exports.postNearby = (req, res) => {
              });
            }
            else{
-             return res.json({result:1, error:"A device matching this deviceID could not be found."});
+             return res.json({result:1, error:"A device matching this deviceID could not be found or is already registered to a Hub."});
            }
          });
        }
@@ -248,7 +251,47 @@ exports.postNearby = (req, res) => {
  * JSON req: {hubID: "xxx", deviceID: "xxx", deviceSettings: {settings}}
  * JSON res: {result: 0/1, error: "xxx"}
  */
- exports.postUpdate = (req, res) => {};
+ exports.postUpdate = (req, res) => {
+   req.assert('hubID', 'hubID is empty').notEmpty();
+   req.assert('deviceID', 'deviceID is empty').notEmpty();
+
+   const errors = req.validationErrors();
+
+   if (errors) {
+     return res.json({result:1, error:errors});
+   }
+
+   var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+   if(token){
+     // verifies secret and checks exp
+     jwt.verify(token, process.env.SECRET, function(err, decoded) {
+       if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
+       else { // if everything is good
+         user = decoded._doc;
+
+         Device.findOne({ _id: req.body.deviceID, hub: req.body.hubID}, (err, existingDevice) => {
+           if (existingDevice){
+             request.post({url:existingDevice.link, body:req.body.deviceSettings}, function(err, response, body) {
+               if(body){
+                 res.json({result: 1, error: err});
+                 console.log(body);
+               }
+               console.log(body);
+             });
+             res.json({result: 0, error: "", devices: existingDevice})
+           }
+           else{
+             res.json({result: 1, error: "Device not found or isnt registered to this hub"});
+           }
+         });
+       }
+     });
+   }
+   else{ // if there is no token return an error
+     return res.json({ result: 1, error: 'No token provided.' });
+   }
+ };
 
 /* 6.
  * POST devices/delete
