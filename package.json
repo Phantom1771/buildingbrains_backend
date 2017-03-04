@@ -13,8 +13,10 @@
     "test": "mocha --reporter spec"
   },
   "dependencies": {
+    "assert": "^1.4.1",
     "async": "^2.1.2",
     "bcrypt-nodejs": "^0.0.3",
+    "bluebird": "^3.5.0",
     "body-parser": "^1.15.2",
     "chai-http": "^3.0.0",
     "chalk": "^1.1.3",

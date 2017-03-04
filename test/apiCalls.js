@@ -32,8 +32,8 @@ describe('Create/Login/Logout User', () => {
     let req = {
       email: "test@test.com",
       password: "testPass",
-      firstName: "test",
-      lastName: "testing"
+      firstname: "test",
+      lastname: "testing"
     }
     chai.request(server)
       .post('/users/signup')
@@ -42,9 +42,29 @@ describe('Create/Login/Logout User', () => {
          res.should.have.status(200)
          res.body.should.be.a('object')
          res.body.should.have.property('result').eql(0)
+         res.body.should.have.property('error').eql("")
          res.body.should.have.property('userToken')
          userToken = res.body.userToken
          done()
+      })
+   })
+
+   it('should update User password', (done) => {
+     let req = {
+       newPassword: "testPassNew"
+     }
+     chai.request(server)
+      .post('/users/account/password')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('userToken')
+        userToken = res.body.userToken
+        done()
       })
    })
 
@@ -61,8 +81,7 @@ describe('Create/Login/Logout User', () => {
           done()
        })
    })
-
-   it('should login a User', (done) => {
+   it('should not login a User with old password', (done) => {
      let req = {
        email: "test@test.com",
        password: "testPass"
@@ -74,11 +93,80 @@ describe('Create/Login/Logout User', () => {
        .end((err, res) => {
           res.should.have.status(200)
           res.body.should.be.a('object')
-          res.body.should.have.property('result').eql(0)
-          res.body.should.have.property('userToken')
-          userToken = res.body.userToken
+          res.body.should.have.property('result').eql(1)
+          res.body.should.have.property('error')
           done()
        })
+   })
+
+   it('should login a User', (done) => {
+     let req = {
+       email: "test@test.com",
+       password: "testPassNew"
+     }
+     chai.request(server)
+       .post('/users/login')
+       .set('x-access-token', userToken)
+       .send(req)
+       .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.a('object')
+          res.body.should.have.property('result').eql(0)
+          res.body.should.have.property('error')
+          done()
+       })
+   })
+
+   it('should get User info', (done) => {
+     chai.request(server)
+      .get('/users/account')
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('firstname').eql('test')
+        res.body.should.have.property('lastname').eql('testing')
+        res.body.should.have.property('email').eql('test@test.com')
+        res.body.should.have.property('hubs')
+        done()
+      })
+   })
+   it('should update User info', (done) => {
+     let req = {
+       firstName: "testing",
+       lastName: "testing"
+     }
+     chai.request(server)
+      .post('/users/account/profile')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('userToken')
+        userToken = res.body.userToken
+        done()
+      })
+   })
+   it('should get Users updated info', (done) => {
+     chai.request(server)
+      .get('/users/account')
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('firstname').eql('testing')
+        res.body.should.have.property('lastname').eql('testing')
+        res.body.should.have.property('email').eql('test@test.com')
+        res.body.should.have.property('hubs')
+        done()
+      })
    })
 })
 
@@ -86,7 +174,7 @@ describe('Register/Add/GetAll/Delete Hub', () => {
   //Register 2 Hubs
   it('should register a new Hub with the server', (done) => {
     let req = {
-      address: "http://test1.test",
+      address: "http://demo.openhab.org:8080/rest/",
       hubCode: hubCode1
     }
     chai.request(server)
@@ -155,7 +243,7 @@ describe('Register/Add/GetAll/Delete Hub', () => {
      })
   })
 
-  it('should retrieve list of hubs', (done) => {
+  it('should retrieve list of two hubs', (done) => {
     chai.request(server)
      .get('/hubs/')
      .set('x-access-token', userToken)
@@ -170,4 +258,33 @@ describe('Register/Add/GetAll/Delete Hub', () => {
        done()
      })
   })
+  //it('should delete testHub2', (done) => {})
+  //it('should retrieve list of one hub', (done) => {})
 })
+
+/*describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
+  it('should register a new device with the server', (done) => {})
+  it('should register a second new device with the server', (done) => {})
+  it('should find all "unregistered ith a user" devices', (done) => {})
+  it('should add testDevice1 to the hub', (done) => {})
+  it('should add testDevice2 to the hub', (done) => {})
+  it('should get all of a hubs devices', (done) => {})
+  it('should delete testDevice2 from the hub', (done) => {})
+  it('should update testDevice1', (done) => {})
+  it('should get all of a hubs devices', (done) => {})
+}*/
+
+/*describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => {
+  it('should add a new group to a hub', (done) => {})
+  it('should get all of a hubs groups', (done) => {})
+  it('should add testDevice1 to a group' (done) => {})
+  it('should get all of a groups devices', (done) => {})
+  it('should remove a device from a group', (done) => {})
+  it('should get all of a groups devices', (done) => {})
+  it('should delete a group', (done) => {})
+  it('should get all of a hubs groups', (done) => {})
+})*/
+
+/*descirbe('Add/sendCommand/Delete Automation', () => {
+
+})*/

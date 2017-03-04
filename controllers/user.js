@@ -28,7 +28,7 @@ exports.postSignup = (req, res) => {
     email: req.body.email,
     password: req.body.password,
     firstname: req.body.firstname,
-    lastname:req.body.lastname
+    lastname: req.body.lastname
   })
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
@@ -41,7 +41,6 @@ exports.postSignup = (req, res) => {
       res.json({result:1, error:'Account with that email address already exists.'})
       return
     }
-
     user.save((err) => {
       if (err) { return next(err) }
       // if user is saved, create a token
@@ -183,54 +182,21 @@ exports.postForgot = (req, res) => {
  * POST /users/reset/
  * Reset password
  * Authentication: header: x-access-token
- * JSON Req: {newPassword:"xxx"}
- * JSON res: {result: 0/1, error: "xxx", passwordResetToken: "xxx"}
+ * JSON Req: {email: "xxx@xxx", password: "xxx", passwordResetToken: "xxx"}
+ * JSON res: {result: 0/1, error: "xxx", userToken: "xxx"}
 */
 exports.postReset = (req, res, next) => {
-  var token = req.headers['x-access-token']
 
-  //hash the newPassword
-  var salt = bcrypt.genSaltSync(10)
-  var newPassword = bcrypt.hashSync(req.body.newPassword, salt)
-
-  if(token){
-    jwt.verify(token, process.env.SECRET, function(err, decoded) {
-      if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.', passwordResetToken: ""})
-        return
-      }
-      else{
-        User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
-          if (err) {
-            res.json({result:1, error:error, passwordResetToken: ""})
-            return
-          }
-          else{
-              var newToken = jwt.sign(existingUser, process.env.SECRET, {
-              expiresIn : 60*60*24 // expires in 24 hours
-            })
-            res.json({ result:0, error:"", passwordResetToken:newToken})
-            return
-          }
-        })
-      }
-    })
-  }
-  else{
-    res.json({ result: 1, error: 'No token provided.', passwordResetToken: ""})
-    return
-  }
 }
 
 /**
  * GET users/account/
  * Return account info
  * Authentication: header: x-access-token
- * JSON req: {}
  * JSON res: {firstName: "xxx", lastName: "xxx", email: "xxx@xxx", password: "xxx", hubs:[hub]}
  */
 
-exports.postAccount = (req, res) => {
+exports.getAccount = (req, res) => {
   var token = req.headers['x-access-token']
 
   if(token){
@@ -247,7 +213,7 @@ exports.postAccount = (req, res) => {
             return
           }
           if (existingUser) {
-            res.json({ result: 0, email:existingUser.email, firstname:existingUser.firstname, lastname:existingUser.lastname, hubs:existingUser.hubs})
+            res.json({ result: 0, error: "", email:existingUser.email, firstname:existingUser.firstname, lastname:existingUser.lastname, hubs:existingUser.hubs})
             return
           }
           else {
@@ -269,7 +235,7 @@ exports.postAccount = (req, res) => {
  * Update profile information.
  * Authentication: header: x-access-token
  * JSON req: {firstName: "xxx", lastName: "xxx"}
- * JSON res: {result: 0/1, error: "xxx", token:"xxx"}
+ * JSON res: {result: 0/1, error: "xxx", userToken:"xxx"}
  */
 
 exports.postUpdateProfile = (req, res, next) => {
@@ -291,7 +257,7 @@ exports.postUpdateProfile = (req, res, next) => {
             var newToken = jwt.sign(existingUser, process.env.SECRET, {
               expiresIn : 60*60*24 // expires in 24 hours
             })
-            res.json({result:0, error:"",token:newToken})
+            res.json({result:0, error:"", userToken:newToken})
             return
           }
         })
@@ -300,6 +266,49 @@ exports.postUpdateProfile = (req, res, next) => {
   }
   else{
     res.json({ result: 1, error: 'No token provided.'})
+    return
+  }
+}
+
+/**
+ * POST users/account/password
+ * Update profile information.
+ * Authentication: header: x-access-token
+ * JSON req: {newPassword: "xxx"}
+ * JSON res: {result: 0/1, error: "xxx", token:"xxx"}
+ */
+exports.postUpdatePassword = (req, res, next) => {
+  var token = req.headers['x-access-token']
+
+  //hash the newPassword
+  var salt = bcrypt.genSaltSync(10)
+  var newPassword = bcrypt.hashSync(req.body.newPassword, salt)
+
+  if(token){
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {
+        res.json({ result: 1, error: 'Failed to authenticate token.', passwordResetToken: ""})
+        return
+      }
+      else{
+        User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
+          if (err) {
+            res.json({result:1, error:error, userToken: ""})
+            return
+          }
+          else{
+              var newToken = jwt.sign(existingUser, process.env.SECRET, {
+              expiresIn : 60*60*24 // expires in 24 hours
+            })
+            res.json({ result:0, error:"", userToken:newToken})
+            return
+          }
+        })
+      }
+    })
+  }
+  else{
+    res.json({ result: 1, error: 'No token provided.', passwordResetToken: ""})
     return
   }
 }

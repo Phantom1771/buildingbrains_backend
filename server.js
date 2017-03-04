@@ -13,6 +13,7 @@ const path = require('path')
 const mongoose = require('mongoose')
 const expressValidator = require('express-validator')
 const expressStatusMonitor = require('express-status-monitor')
+const assert = require('assert')
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -69,8 +70,9 @@ server.post('/users/login/', userController.postLogin)
 server.post('/users/logout/', userController.postLogout)
 server.post('/users/forgot/', userController.postForgot)
 server.post('/users/reset/', userController.postReset)
-server.post('/users/account/', userController.postAccount)
+server.get('/users/account/', userController.getAccount)
 server.post('/users/account/profile/', userController.postUpdateProfile)
+server.post('/users/account/password', userController.postUpdatePassword)
 server.post('/users/account/delete/', userController.postDeleteAccount)
 
 //Hub

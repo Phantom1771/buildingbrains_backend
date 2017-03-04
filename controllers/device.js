@@ -215,7 +215,7 @@ exports.postNearby = (req, res) => {
                existingDevice.type = JSON.parse(body).type
 
                if(existingDevice.type == "Switch"){
-                 existingDevice.params = ["on","off"]
+                 existingDevice.params = ["ON","OFF"]
                }
                else if(existingDevice.type == "Dimmer"){
                  existingDevice.params = ["percent"]
@@ -227,7 +227,7 @@ exports.postNearby = (req, res) => {
                  existingDevice.params = ["float"]
                }
                else if(existingDevice.type == "Contact"){
-                 existingDevice.params = ["open", "closed"]
+                 existingDevice.params = ["OPEN", "CLOSED"]
                }
                else{
                  existingDevice.params = []
