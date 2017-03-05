@@ -442,6 +442,7 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
        done()
      })
   })
+
   it('should get all of a hubs 1 device', (done) => {
     let req = {
       hubID: hubID1
@@ -458,20 +459,6 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
        res.body.should.have.property('devices').length(1)
        done()
      })
-  })
-  it('should get testDevice1, state should be OFF', (done) => {
-    chai.request(server)
-      .get('/devices/'+deviceID1._id)
-      .set('x-access-token', userToken)
-      .end((err, res) => {
-        res.should.have.status(200)
-        res.body.should.be.a('object')
-        res.body.should.have.property('result').eql(0)
-        res.body.should.have.property('error').eql("")
-        res.body.should.have.property('device')
-        res.body.device.should.have.property('state').eql("OFF")
-        done()
-      })
   })
 
   it('should update testDevice1 to OFF', (done) => {
@@ -491,6 +478,22 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
         res.body.should.have.property('error').eql("")
         done()
       })
+  })
+  
+  it('should get testDevice1, state should be OFF', (done) => {
+    chai.request(server)
+      .get('/devices/'+deviceID1._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('device')
+        res.body.device.should.have.property('state').eql("OFF")
+        done()
+      })
+  })
 
   it('should update testDevice1 to ON', (done) => {
     let req = {
