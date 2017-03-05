@@ -1,15 +1,18 @@
-const bcrypt = require('bcrypt-nodejs');
-const crypto = require('crypto');
-const mongoose = require('mongoose');
+const bcrypt = require('bcrypt-nodejs')
+const crypto = require('crypto')
+const mongoose = require('mongoose')
 
 const deviceSchema = new mongoose.Schema({
   name: String,
-  address: String,
-  hub: String,
+  link: { type: String, unique: true },
+  hub: {type: mongoose.Schema.Types.ObjectId, ref: 'Hub'},
+  state: String,
+  type: String,
+  category: String,
   groups: [{type: mongoose.Schema.Types.ObjectId, ref: 'Group'}],
-  status: String,
-  deviceType: String
-}, { timestamps: true });
+  params: [String],
+  registered: Boolean
+}, { timestamps: true })
 
-const Device = mongoose.model('Device', deviceSchema);
-module.exports = Device;
+const Device = mongoose.model('Device', deviceSchema)
+module.exports = Device

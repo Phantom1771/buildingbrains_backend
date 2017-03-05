@@ -1,10 +1,11 @@
-const async = require('async');
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const helper = require('sendgrid').mail;
-const bcrypt = require('bcrypt-nodejs');
+
+const async = require('async')
+const crypto = require('crypto')
+const nodemailer = require('nodemailer')
+const User = require('../models/User')
+const jwt = require('jsonwebtoken')
+const helper = require('sendgrid').mail
+const bcrypt = require('bcrypt-nodejs')
 
 /* #1
  * POST users/signup/
@@ -13,45 +14,46 @@ const bcrypt = require('bcrypt-nodejs');
  * JSON Res: { result: 0/1, error:"xxx", userToken:"xxx"}
  */
 exports.postSignup = (req, res) => {
+  req.assert('email', 'Email is not valid').isEmail()
+  req.assert('password', 'Password must be at least 4 characters long').len(4)
+  req.sanitize('email').normalizeEmail({ remove_dots: false })
 
-  console.log("postSignup \n",req.body);
-
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('password', 'Password must be at least 4 characters long').len(4);
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
-
-  const errors = req.validationErrors();
+  const errors = req.validationErrors()
 
   if (errors) {
-    return res.json({result:1, error:errors});
+    res.json({result:1, error:errors})
+    return
   }
 
   const user = new User({
     email: req.body.email,
     password: req.body.password,
     firstname: req.body.firstname,
-    lastname:req.body.lastname
-  });
+    lastname: req.body.lastname
+  })
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) {
-      return res.json({result:1, error:error});
+      res.json({result:1, error:error})
+      return
     }
 
     if (existingUser) {
-      return res.json({result:1, error:'Account with that email address already exists.'});
+      res.json({result:1, error:'Account with that email address already exists.'})
+      return
     }
-
     user.save((err) => {
-      if (err) { return next(err); }
+      if (err) { return next(err) }
       // if user is saved, create a token
           var token = jwt.sign(user, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
-          });
-      return res.json({result:0,error:"", userToken: token});
-    });
-  });
-};
+
+          })
+      res.json({result:0,error:"", userToken: token})
+      return
+    })
+  })
+}
 
 /* #2
  * POST /users/login/
@@ -60,21 +62,20 @@ exports.postSignup = (req, res) => {
  * JSON Res: { result: 0/1, error:"xxx", userToken: "xxx"}
  */
 exports.postLogin = (req, res) => {
-
-  console.log("postLogin \n",req.body);
-
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('password', 'Password cannot be blank').notEmpty();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
-  const errors = req.validationErrors();
+  req.assert('email', 'Email is not valid').isEmail()
+  req.assert('password', 'Password cannot be blank').notEmpty()
+  req.sanitize('email').normalizeEmail({ remove_dots: false })
+  const errors = req.validationErrors()
 
   if (errors) {
-    return res.json({result:1, error:errors});
+    res.json({result:1, error:errors})
+    return
   }
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) {
-      return res.json({result:1, error:err});
+      res.json({result:1, error:err})
+      return
     }
     if (existingUser) {
       existingUser.comparePassword(req.body.password, function(err, isMatch) {
@@ -82,44 +83,53 @@ exports.postLogin = (req, res) => {
           // if user is found and password is right create a token
           var token = jwt.sign(existingUser, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
-          });
-          return res.json({result:0, error:"", userToken: token});
+
+          })
+          res.json({result:0, error:"", userToken: token})
+          return
         }
-          return res.json({result:1, error:"Password incorrect!"});
-    });
+          res.json({result:1, error:"Password incorrect!"})
+          return
+    })
     }
-    else return res.json({result:1, error:"User not found!"});
-  });
-};
+    else {
+      res.json({result:1, error:"User not found!"})
+      return
+    }
+  })
+}
 
 /* #3
  * POST /users/logout/
  * Log out.
- * Authentication: Header x-access-token
+ * Authentication: header: x-access-token
  * JSON Req: {}
  * JSON Res: { result: 0/1, error:"xxx" }
  */
 exports.postLogout = (req, res) => {
-
-  console.log("postLogout \n",req.body);
   // check header or url parameters or post parameters for token
-  var token = req.body.userToken || req.query.userToken || req.headers['x-access-token'];
+  var token = req.headers['x-access-token']
 
   if(token){
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
-      else { // if everything is good, save to request for use in other routes
-        console.log(decoded._doc.email);
-        //req.decoded = decoded;
-        return res.json({ result: 0, error: '' });
+      if (err) {
+        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        return
       }
-    });
+      else { // if everything is good, save to request for use in other routes
+        res.json({ result: 0, error: '' })
+        return
+
+      }
+    })
   }
   else{ // if there is no token return an error
-    return res.json({ result: 1, error: 'No token provided.' });
+    res.json({ result: 1, error: 'No token provided.' })
+    return
   }
-};
+}
+
 
 /* #4
  * POST /users/forgot/
@@ -128,178 +138,217 @@ exports.postLogout = (req, res) => {
  * JSON Res: { result: 0/1, error:"xxx"}
  */
 exports.postForgot = (req, res) => {
-
-  console.log("postForgot \n",req.body);
-
-  req.assert('email', 'Email is not valid').isEmail();
-  const errors = req.validationErrors();
+  req.assert('email', 'Email is not valid').isEmail()
+  const errors = req.validationErrors()
 
   if (errors) {
-    return res.json({result:1, error:errors});
+    res.json({result:1, error:errors})
+    return
   }
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) {
-      return res.json({result:1, error:err});
+      res.json({result:1, error:err})
+      return
     }
     if (existingUser) {
       var token = jwt.sign(existingUser, process.env.SECRET, {
           expiresIn : 60*60 // expires in 1 hours
-          });
+          })
       email_content = "<h3>Hi "+existingUser.lastname+", </h3> <p>We have received a request to reset your password. If you did not make the request, just ignore this email.<p><p>Otherwise, you can reset your password using this temp password: "+token+".<p></br> Thanks,</br>BuildingBrains Team"
-      from_email = new helper.Email("BuildingBrains@colorado.edu");
-      to_email = new helper.Email("yang.song@colorado.edu");
-      subject = "Reset your Password";
-      content = new helper.Content("text/html", email_content);
-      mail = new helper.Mail(from_email, subject, to_email, content);
-      var sg = require('sendgrid')(process.env.SENDGRID_API_KEY);
+      from_email = new helper.Email("BuildingBrains@colorado.edu")
+      to_email = new helper.Email("yang.song@colorado.edu")
+      subject = "Reset your Password"
+      content = new helper.Content("text/html", email_content)
+      mail = new helper.Mail(from_email, subject, to_email, content)
+      var sg = require('sendgrid')(process.env.SENDGRID_API_KEY)
       var request = sg.emptyRequest({
           method: 'POST',
           path: '/v3/mail/send',
           body: mail.toJSON()
-      });
+      })
 
       sg.API(request, function(error, response) {
-          console.log(response.statusCode);
-          console.log(response.body);
-          console.log(response.headers);
+          console.log(response.statusCode)
+          console.log(response.body)
+          console.log(response.headers)
       })
-      return res.json({result:0, error:"email is sent"});
+      res.json({result:0, error:"Email is sent!"})
+      return
     }
-    else return res.json({result:1, error:""});
-  });
-};
+    else {
+      res.json({result:1, error:"User not found!"})
+      return
+    }
+  })
+}
 
 /**
  * POST /users/reset/
  * Reset password
- * JSON Req: {password:"xxx",passwordResetToken: "xxx",}
+ * Authentication: header: x-access-token
+ * JSON Req: {email: "xxx@xxx", password: "xxx", passwordResetToken: "xxx"}
  * JSON res: {result: 0/1, error: "xxx", userToken: "xxx"}
 */
 exports.postReset = (req, res, next) => {
 
-  console.log("postReset \n",req.body);
-
-  var token = req.body.passwordResetToken || req.query.passwordResetToken || req.headers['x-access-token'];
-
-  //hash the newPassword
-  var salt = bcrypt.genSaltSync(10);
-  var newPassword = bcrypt.hashSync(req.body.password, salt);
-
-  if(token){
-    jwt.verify(token, process.env.SECRET, function(err, decoded) {
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.', userToken:""});}
-      else{
-        console.log(decoded._doc.email);
-        console.log(newPassword);
-        User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
-          if (err) {return res.json({result:1, error:error, userToken: ""})}
-          else{
-              var newToken = jwt.sign(existingUser, process.env.SECRET, {
-              expiresIn : 60*60*24 // expires in 24 hours
-            });
-            return res.json({ result:0, error:"", userToken:newToken});
-          }
-        });
-      }
-    });
-    //return res.json({ result: 1, error:"Token error", passwordResetToken:""});
-  }
-  else{return res.json({ result: 1, error: 'No token provided.', userToken: ""});}
-};
+}
 
 /**
- * POST users/account/
+ * GET users/account/
  * Return account info
- * Authentication: Header x-access-token
+ * Authentication: header: x-access-token
  * JSON res: {firstName: "xxx", lastName: "xxx", email: "xxx@xxx", password: "xxx", hubs:[hub]}
  */
-
 exports.getAccount = (req, res) => {
-
-  console.log("postAccount \n");
-  var token = req.body.userToken || req.query.userToken || req.headers['x-access-token'];
+  var token = req.headers['x-access-token']
 
   if(token){
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.' });}
-      else {
-        console.log(decoded._doc.email);
-        User.findOne({ email: decoded._doc.email }, (err, existingUser) => {
-          if (err) {return res.json({result:1, error:err});}
-          console.log(existingUser);
-          if (existingUser) {
-            return res.json({ result: 0, email:existingUser.email, firstname:existingUser.firstname, lastname:existingUser.lastname, hubs:existingUser.hubs});
-          }
-          else {return res.json({result:1, error:"User not found!"});}
-        });
+      if (err) {
+        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        return
       }
-    });
+      else {
+        User.findOne({ email: decoded._doc.email }, (err, existingUser) => {
+          if (err) {
+            res.json({result:1, error:err})
+            return
+          }
+          if (existingUser) {
+            res.json({ result: 0, error: "", email:existingUser.email, firstname:existingUser.firstname, lastname:existingUser.lastname, hubs:existingUser.hubs})
+            return
+          }
+          else {
+            res.json({result:1, error:"User not found!"})
+            return
+          }
+        })
+      }
+    })
   }
-  else{ return res.json({ result: 1, error: 'No token provided.' });}
-};
+  else{
+    res.json({ result: 1, error: 'No token provided.' })
+    return
+  }
+}
 
 /**
  * POST /account/profile
  * Update profile information.
+ * Authentication: header: x-access-token
  * JSON req: {firstName: "xxx", lastName: "xxx"}
  * JSON res: {result: 0/1, error: "xxx", userToken:"xxx"}
  */
+
 exports.postUpdateProfile = (req, res, next) => {
-
-  console.log("postUpdateProfile \n",req.body);
-
-  var token = req.body.userToken || req.query.userToken || req.headers['x-access-token'];
+  var token = req.headers['x-access-token']
 
   if(token){
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.'});}
+      if (err) {
+        res.json({ result: 1, error: 'Failed to authenticate token.'})
+        return
+      }
       else{
-        console.log(decoded._doc.email);
         User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { firstname: req.body.firstName, lastname:req.body.lastName  }}, { multi: true }, (err, existingUser) => {
-            console.log(existingUser);
-          if (err) {return res.json({result:1, error:error, userToken:""})}
+          if (err) {
+            res.json({result:1, error:error})
+            return
+          }
           else{
             var newToken = jwt.sign(existingUser, process.env.SECRET, {
               expiresIn : 60*60*24 // expires in 24 hours
-            });
-            return res.json({result:0, error:"",userToken:newToken});
+            })
+            res.json({result:0, error:"", userToken:newToken})
+            return
           }
-        });
+        })
       }
-    });
-    //return res.json({ result: 1, error:"Token error", passwordResetToken:""});
+    })
   }
-  else{return res.json({ result: 1, error: 'No token provided.'});}
-};
+  else{
+    res.json({ result: 1, error: 'No token provided.'})
+    return
+  }
+}
+
+/**
+ * POST users/account/password
+ * Update profile information.
+ * Authentication: header: x-access-token
+ * JSON req: {newPassword: "xxx"}
+ * JSON res: {result: 0/1, error: "xxx", token:"xxx"}
+ */
+exports.postUpdatePassword = (req, res, next) => {
+  var token = req.headers['x-access-token']
+
+  //hash the newPassword
+  var salt = bcrypt.genSaltSync(10)
+  var newPassword = bcrypt.hashSync(req.body.newPassword, salt)
+
+  if(token){
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {
+        res.json({ result: 1, error: 'Failed to authenticate token.', passwordResetToken: ""})
+        return
+      }
+      else{
+        User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
+          if (err) {
+            res.json({result:1, error:error, userToken: ""})
+            return
+          }
+          else{
+              var newToken = jwt.sign(existingUser, process.env.SECRET, {
+              expiresIn : 60*60*24 // expires in 24 hours
+            })
+            res.json({ result:0, error:"", userToken:newToken})
+            return
+          }
+        })
+      }
+    })
+  }
+  else{
+    res.json({ result: 1, error: 'No token provided.', passwordResetToken: ""})
+    return
+  }
+}
 
 /**
  * POST users/account/delete
  * Delete account
- * Authentication: Header x-access-token
- * JSON req:
+ * Authentication: header: x-access-token
+ * JSON req: {}
  * JSON res: {result: 0/1, error: "xxx"}
  */
 exports.postDeleteAccount = (req, res, next) => {
-
-  console.log("postDeleteAccount \n",req.body);
-
-  var token = req.body.userToken || req.query.userToken || req.headers['x-access-token'];
+  var token = req.headers['x-access-token']
 
   if(token){
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
-      if (err) {return res.json({ result: 1, error: 'Failed to authenticate token.'});}
-      else{
-        console.log(decoded._doc.email);
-        User.remove({ email: decoded._doc.email }, function (err) {
-          if(err)  {return res.json({ result: 1, error:err});}
-          else     {return res.json({ result: 0, error:""});}
-          // removed!
-         });
+      if (err) {
+        res.json({ result: 1, error: 'Failed to authenticate token.'})
+        return
       }
-    });
-    //return res.json({ result: 1, error:"Token error", passwordResetToken:""});
+      else{
+        User.remove({ email: decoded._doc.email }, function (err) {
+          if(err)  {
+            res.json({ result: 1, error:err})
+            return
+          }
+          else {
+            res.json({ result: 0, error:""})
+            return
+          }
+         })
+      }
+    })
   }
-  else{return res.json({ result: 1, error: 'No token provided.'});}
-};
+  else{
+    res.json({ result: 1, error: 'No token provided.'})
+    return
+  }
+}
