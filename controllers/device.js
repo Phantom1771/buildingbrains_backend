@@ -104,7 +104,7 @@ exports.getDevice = (req, res) => {
                   res.json({result:1, error:err})
                   return
                 }
-                res.json({result:0, error:"", devices: existingDevice})
+                res.json({result:0, error:"", device: existingDevice})
                 return
               })
             })
@@ -382,26 +382,11 @@ exports.postNearby = (req, res) => {
            }
 
            if (existingDevice){
-            //Then add to hub
-             Hub.findOne({ _id:req.body.hubID}, (err, existingHub) => {
-               if (err) {
-                 res.json({result:1, error:error})
-                 return
-               }
+             existingDevice.registered = false;
+             existingDevice.save()
 
-               if (existingHub) {
-                 existingHub.devices.pull(existingDevice)
-
-                 existingHub.save()
-
-                 res.json({result:0, error:""})
-                 return
-               }
-               else{
-                 res.json({result:1, error:"A hub matching this hubID could not be found."})
-                 return
-               }
-             })
+             res.json({result:0, error: ""})
+             return
            }
            else{
              res.json({result:1, error:"A device matching this deviceID could not be found."})

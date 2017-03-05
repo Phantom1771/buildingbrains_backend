@@ -195,7 +195,6 @@ exports.postReset = (req, res, next) => {
  * Authentication: header: x-access-token
  * JSON res: {firstName: "xxx", lastName: "xxx", email: "xxx@xxx", password: "xxx", hubs:[hub]}
  */
-
 exports.getAccount = (req, res) => {
   var token = req.headers['x-access-token']
 

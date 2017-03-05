@@ -88,6 +88,7 @@ server.post('/devices/add', deviceController.postAdd)
 server.post('/devices/', deviceController.postAll)
 server.get('/devices/:deviceID', deviceController.getDevice)
 server.post('/devices/update', deviceController.postUpdate)
+server.post('/devices/delete', deviceController.postDelete)
 
 /**
  * Error Handler.

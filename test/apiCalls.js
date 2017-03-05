@@ -6,6 +6,7 @@ const should = chai.should()
 
 const User = require('../models/User')
 const Hub = require('../models/Hub')
+const Device = require('../models/Device')
 
 chai.use(chaiHttp)
 
@@ -14,6 +15,8 @@ var hubCode1 = "testHubCode1"
 var hubCode2 = "testHubCode2"
 var hubID1 = ""
 var hubID2 = ""
+var deviceID1 = ""
+var deviceID2 = ""
 
 
 describe('Create/Login/Logout User', () => {
@@ -26,6 +29,11 @@ describe('Create/Login/Logout User', () => {
       Hub.remove({}, (err) => {
          done()
       })
+  })
+  before((done) => {
+    Device.remove({}, (err) => {
+      done()
+    })
   })
 
   it('should create a new User', (done) => {
@@ -252,27 +260,273 @@ describe('Register/Add/GetAll/Delete Hub', () => {
        res.body.should.be.a('object')
        res.body.should.have.property('result').eql(0)
        res.body.should.have.property('error').eql("")
-       res.body.should.have.property('hubs')
+       res.body.should.have.property('hubs').length(2)
        hubID1 = res.body.hubs[0]
        hubID2 = res.body.hubs[1]
        done()
      })
   })
-  //it('should delete testHub2', (done) => {})
-  //it('should retrieve list of one hub', (done) => {})
+
+  it('should delete testHub2', (done) => {
+    let req = {
+      hubID: hubID2
+    }
+    chai.request(server)
+     .post('/hubs/delete')
+     .set('x-access-token', userToken)
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       done()
+     })
+  })
+  it('should retrieve list of one hub', (done) => {
+    chai.request(server)
+     .get('/hubs/')
+     .set('x-access-token', userToken)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       res.body.should.have.property('hubs').length(1)
+       done()
+     })
+  })
 })
 
-/*describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
-  it('should register a new device with the server', (done) => {})
-  it('should register a second new device with the server', (done) => {})
-  it('should find all "unregistered ith a user" devices', (done) => {})
-  it('should add testDevice1 to the hub', (done) => {})
-  it('should add testDevice2 to the hub', (done) => {})
-  it('should get all of a hubs devices', (done) => {})
-  it('should delete testDevice2 from the hub', (done) => {})
-  it('should update testDevice1', (done) => {})
-  it('should get all of a hubs devices', (done) => {})
-}*/
+describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
+  it('should register a new device with the server', (done) => {
+    let req = {
+      deviceLink: "http://demo.openhab.org:8080/rest/items/Heating_GF_Toilet",
+      hubCode: hubCode1
+    }
+    chai.request(server)
+     .post('/devices/register')
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       done()
+     })
+  })
+  it('should register a second new device with the server', (done) => {
+    let req = {
+      deviceLink: "http://demo.openhab.org:8080/rest/items/Light_FF_Child_Ceiling",
+      hubCode: hubCode1
+    }
+    chai.request(server)
+     .post('/devices/register')
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       done()
+     })
+  })
+
+  it('should find 2 "unregistered with a hub" devices', (done) => {
+    let req = {
+      hubID: hubID1
+    }
+    chai.request(server)
+     .post('/devices/nearby')
+     .set('x-access-token', userToken)
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       res.body.should.have.property('devices').length(2)
+       deviceID1 = res.body.devices[0]
+       deviceID2 = res.body.devices[1]
+       done()
+     })
+  })
+
+  it('should add testDevice1 to the hub', (done) => {
+    let req = {
+      hubID: hubID1,
+      deviceID: deviceID1,
+      deviceName: "testDevice1"
+    }
+    chai.request(server)
+     .post('/devices/add')
+     .set('x-access-token', userToken)
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       done()
+     })
+  })
+
+  it('should add testDevice2 to the hub', (done) => {
+    let req = {
+      hubID: hubID1,
+      deviceID: deviceID2,
+      deviceName: "testDevice2"
+    }
+    chai.request(server)
+     .post('/devices/add')
+     .set('x-access-token', userToken)
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       done()
+     })
+  })
+  it('should find 0 "unregistered with a hub" devices', (done) => {
+    let req = {
+      hubID: hubID1
+    }
+    chai.request(server)
+     .post('/devices/nearby')
+     .set('x-access-token', userToken)
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       res.body.should.have.property('devices').length(0)
+       done()
+     })
+  })
+
+  it('should get all of a hubs 2 devices', (done) => {
+    let req = {
+      hubID: hubID1
+    }
+    chai.request(server)
+     .post('/devices/')
+     .set('x-access-token', userToken)
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       res.body.should.have.property('devices').length(2)
+       done()
+     })
+  })
+
+  it('should delete testDevice2 from the hub', (done) => {
+    let req = {
+      hubID: hubID1,
+      deviceID: deviceID2
+    }
+    chai.request(server)
+     .post('/devices/delete')
+     .set('x-access-token', userToken)
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       done()
+     })
+  })
+  it('should get all of a hubs 1 device', (done) => {
+    let req = {
+      hubID: hubID1
+    }
+    chai.request(server)
+     .post('/devices/')
+     .set('x-access-token', userToken)
+     .send(req)
+     .end((err, res) => {
+       res.should.have.status(200)
+       res.body.should.be.a('object')
+       res.body.should.have.property('result').eql(0)
+       res.body.should.have.property('error').eql("")
+       res.body.should.have.property('devices').length(1)
+       done()
+     })
+  })
+  it('should get testDevice1, state should be OFF', (done) => {
+    chai.request(server)
+      .get('/devices/'+deviceID1._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('device')
+        res.body.device.should.have.property('state').eql("OFF")
+        done()
+      })
+  })
+
+  it('should update testDevice1 to ON', (done) => {
+    let req = {
+      hubID: hubID1,
+      deviceID: deviceID1,
+      deviceSettings: "ON"
+    }
+    chai.request(server)
+      .post('/devices/update')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should get testDevice1, state should be ON', (done) => {
+    chai.request(server)
+      .get('/devices/'+deviceID1._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('device')
+        res.body.device.should.have.property('state').eql("ON")
+        done()
+      })
+  })
+
+  it('should update testDevice1 to OFF', (done) => {
+    let req = {
+      hubID: hubID1,
+      deviceID: deviceID1,
+      deviceSettings: "OFF"
+    }
+    chai.request(server)
+      .post('/devices/update')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+})
 
 /*describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => {
   it('should add a new group to a hub', (done) => {})
