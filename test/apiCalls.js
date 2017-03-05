@@ -7,6 +7,7 @@ const should = chai.should()
 const User = require('../models/User')
 const Hub = require('../models/Hub')
 const Device = require('../models/Device')
+const Group = require('../models/Group')
 
 chai.use(chaiHttp)
 
@@ -17,21 +18,26 @@ var hubID1 = ""
 var hubID2 = ""
 var deviceID1 = ""
 var deviceID2 = ""
-
+var groupID = ""
 
 describe('Create/Login/Logout User', () => {
   before((done) => {
-      User.remove({}, (err) => {
-         done()
-      })
+    User.remove({}, (err) => {
+       done()
+    })
   })
   before((done) => {
-      Hub.remove({}, (err) => {
-         done()
-      })
+    Hub.remove({}, (err) => {
+       done()
+    })
   })
   before((done) => {
     Device.remove({}, (err) => {
+      done()
+    })
+  })
+  before((done) => {
+    Group.remove({}, (err) => {
       done()
     })
   })
@@ -479,7 +485,7 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
         done()
       })
   })
-  
+
   it('should get testDevice1, state should be OFF', (done) => {
     chai.request(server)
       .get('/devices/'+deviceID1._id)
@@ -549,16 +555,146 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
   })
 })
 
-/*describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => {
-  it('should add a new group to a hub', (done) => {})
-  it('should get all of a hubs groups', (done) => {})
-  it('should add testDevice1 to a group' (done) => {})
-  it('should get all of a groups devices', (done) => {})
-  it('should remove a device from a group', (done) => {})
-  it('should get all of a groups devices', (done) => {})
-  it('should delete a group', (done) => {})
-  it('should get all of a hubs groups', (done) => {})
-})*/
+describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => {
+  /*it('should add a new group to a hub', (done) => {
+    let req = {
+      hubID: hubID1,
+      groupName: "testGroup",
+      groupType: "General"
+    }
+    chai.request(server)
+      .post('/groups/add')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+  it('should get all of a hubs 1 groups', (done) => {
+    let req = {
+      hubID: hubID1
+    }
+    chai.request(server)
+      .post('/groups/')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('groups').length(1)
+        groupID = res.body.groups[0]
+        done()
+      })
+  })
+
+  it('should add testDevice1 to a group' (done) => {
+    let req = {
+      hubID: hubID1,
+      groupID: groupID,
+      deviceID: deviceID1
+    }
+    chai.request(server)
+      .post('/groups/addDevice')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should get all of a groups 1 devices', (done) => {
+    chai.request(server)
+      .get('/groups/'+groupID._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('devices').length(1)
+        done()
+      })
+  })
+
+  it('should remove a device from a group', (done) => {
+    let req = {
+      hubID: hubID1,
+      groupID: groupID,
+      deviceID: deviceID1
+    }
+    chai.request(server)
+      .post('/groups/removeDevice')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should get all of a groups 0 devices', (done) => {
+    chai.request(server)
+      .get('/groups/'+groupID._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('devices').length(0)
+        done()
+      })
+  })
+
+  it('should delete a group', (done) => {
+    let req = {
+      hubID: hubID1,
+      groupID: groupID
+    }
+    chai.request(server)
+      .post('/groups/delete')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should get all of a hubs groups', (done) => {
+    let req = {
+      hubID: hubID1
+    }
+    chai.request(server)
+      .post('/groups/')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('groups').length(0)
+        done()
+      })
+  })*/
+})
 
 /*descirbe('Add/sendCommand/Delete Automation', () => {
 
