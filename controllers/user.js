@@ -187,11 +187,51 @@ exports.postForgot = (req, res) => {
  * POST /users/reset/
  * Reset password
  * Authentication: header: x-access-token
- * JSON Req: {email: "xxx@xxx", password: "xxx", passwordResetToken: "xxx"}
+ * JSON Req: {email: "xxx@xxx", newPassword: "xxx", passwordResetToken: "xxx"}
  * JSON res: {result: 0/1, error: "xxx", userToken: "xxx"}
 */
 exports.postReset = (req, res, next) => {
+  req.assert('email', 'Email is not valid').isEmail()
+  req.assert('password', 'Password must be at least 4 characters long').len(4)
+  req.sanitize('email').normalizeEmail({ remove_dots: false })
 
+  const errors = req.validationErrors()
+
+  if (errors) {
+    res.json({result:1, error:errors})
+    return
+  }
+
+  var token = passwordResetToken
+
+  if(token){
+    // verifies secret and checks exp
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {
+        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        return
+      }
+      else { // if everything is good, save to request for use in other routes
+        User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
+          if (err) {
+            res.json({result:1, error:error, userToken: ""})
+            return
+          }
+          else{
+              var newToken = jwt.sign(existingUser, process.env.SECRET, {
+              expiresIn : 60*60*24 // expires in 24 hours
+            })
+            res.json({ result:0, error:"", userToken:newToken})
+            return
+          }
+        })
+      }
+    })
+  }
+  else{ // if there is no token return an error
+    res.json({ result: 1, error: 'No token provided.' })
+    return
+  }
 }
 
 /**
@@ -243,6 +283,7 @@ exports.getAccount = (req, res) => {
  */
 
 exports.postUpdateProfile = (req, res, next) => {
+
   var token = req.headers['x-access-token']
 
   if(token){
@@ -282,6 +323,8 @@ exports.postUpdateProfile = (req, res, next) => {
  * JSON res: {result: 0/1, error: "xxx", token:"xxx"}
  */
 exports.postUpdatePassword = (req, res, next) => {
+  req.assert('password', 'Password must be at least 4 characters long').len(4)
+
   var token = req.headers['x-access-token']
 
   //hash the newPassword
