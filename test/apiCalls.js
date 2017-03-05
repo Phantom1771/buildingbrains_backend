@@ -474,6 +474,24 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
       })
   })
 
+  it('should update testDevice1 to OFF', (done) => {
+    let req = {
+      hubID: hubID1,
+      deviceID: deviceID1,
+      deviceSettings: "OFF"
+    }
+    chai.request(server)
+      .post('/devices/update')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+
   it('should update testDevice1 to ON', (done) => {
     let req = {
       hubID: hubID1,
