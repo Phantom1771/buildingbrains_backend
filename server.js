@@ -14,6 +14,7 @@ const mongoose = require('mongoose')
 const expressValidator = require('express-validator')
 const expressStatusMonitor = require('express-status-monitor')
 const assert = require('assert')
+const cors = require("cors")
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -26,6 +27,7 @@ dotenv.load({ path: '.env.example' })
 const userController = require('./controllers/user')
 const hubController = require('./controllers/hub')
 const deviceController = require('./controllers/device')
+
 
 /**
  * Create Express server.
@@ -51,15 +53,12 @@ server.set('superSecret', process.env.SECRET)
 server.set('port', process.env.PORT || 3000)
 server.use(expressStatusMonitor())
 server.use(compression())
+
 server.use(logger('dev'))
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({ extended: true }))
 server.use(expressValidator())
-server.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*")
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token")
-  next()
-})
+server.use(cors())
 
 /**
  * Primary server routes.

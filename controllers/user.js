@@ -1,3 +1,4 @@
+
 const async = require('async')
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
@@ -46,6 +47,7 @@ exports.postSignup = (req, res) => {
       // if user is saved, create a token
           var token = jwt.sign(user, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
+
           })
       res.json({result:0,error:"", userToken: token})
       return
@@ -81,6 +83,7 @@ exports.postLogin = (req, res) => {
           // if user is found and password is right create a token
           var token = jwt.sign(existingUser, process.env.SECRET, {
           expiresIn : 60*60*24 // expires in 24 hours
+
           })
           res.json({result:0, error:"", userToken: token})
           return
@@ -117,6 +120,7 @@ exports.postLogout = (req, res) => {
       else { // if everything is good, save to request for use in other routes
         res.json({ result: 0, error: '' })
         return
+
       }
     })
   }
@@ -125,6 +129,7 @@ exports.postLogout = (req, res) => {
     return
   }
 }
+
 
 /* #4
  * POST /users/forgot/
