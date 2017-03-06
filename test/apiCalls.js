@@ -26,21 +26,6 @@ describe('Create/Login/Logout User', () => {
        done()
     })
   })
-  before((done) => {
-    Hub.remove({}, (err) => {
-       done()
-    })
-  })
-  before((done) => {
-    Device.remove({}, (err) => {
-      done()
-    })
-  })
-  before((done) => {
-    Group.remove({}, (err) => {
-      done()
-    })
-  })
 
   it('should create a new User', (done) => {
     let req = {
@@ -185,6 +170,11 @@ describe('Create/Login/Logout User', () => {
 })
 
 describe('Register/Add/GetAll/Delete Hub', () => {
+  before((done) => {
+    Hub.remove({}, (err) => {
+       done()
+    })
+  })
   //Register 2 Hubs
   it('should register a new Hub with the server', (done) => {
     let req = {
@@ -305,6 +295,12 @@ describe('Register/Add/GetAll/Delete Hub', () => {
 })
 
 describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
+  before((done) => {
+    Device.remove({}, (err) => {
+      done()
+    })
+  })
+
   it('should register a new device with the server', (done) => {
     let req = {
       deviceLink: "http://demo.openhab.org:8080/rest/items/Heating_GF_Toilet",
@@ -556,7 +552,13 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
 })
 
 describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => {
-  /*it('should add a new group to a hub', (done) => {
+  before((done) => {
+    Group.remove({}, (err) => {
+      done()
+    })
+  })
+
+  it('should add a new group to a hub', (done) => {
     let req = {
       hubID: hubID1,
       groupName: "testGroup",
@@ -593,7 +595,7 @@ describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => 
       })
   })
 
-  it('should add testDevice1 to a group' (done) => {
+  it('should add testDevice1 to a group', (done) => {
     let req = {
       hubID: hubID1,
       groupID: groupID,
@@ -612,7 +614,7 @@ describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => 
       })
   })
 
-  it('should get all of a groups 1 devices', (done) => {
+  /*it('should get all of a groups 1 devices', (done) => {
     chai.request(server)
       .get('/groups/'+groupID._id)
       .set('x-access-token', userToken)
