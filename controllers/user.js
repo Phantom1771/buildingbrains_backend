@@ -202,7 +202,7 @@ exports.postReset = (req, res, next) => {
     return
   }
 
-  var token = passwordResetToken
+  var token = req.body.passwordResetToken
 
   if(token){
     // verifies secret and checks exp
