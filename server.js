@@ -27,7 +27,7 @@ dotenv.load({ path: '.env.example' })
 const userController = require('./controllers/user')
 const hubController = require('./controllers/hub')
 const deviceController = require('./controllers/device')
-
+const groupController = require('./controllers/group')
 
 /**
  * Create Express server.
@@ -88,6 +88,14 @@ server.post('/devices/', deviceController.postAll)
 server.get('/devices/:deviceID', deviceController.getDevice)
 server.post('/devices/update', deviceController.postUpdate)
 server.post('/devices/delete', deviceController.postDelete)
+
+//Group
+server.post('/groups/add', groupController.postAdd)
+server.post('/groups/', groupController.postAll)
+server.post('/groups/addDevice', groupController.postAddDevice)
+server.get('/groups/:groupID', groupController.getGroup)
+server.post('/groups/removeDevice', groupController.postRemoveDevice)
+server.post('/groups/delete', groupController.postDelete)
 
 /**
  * Error Handler.
