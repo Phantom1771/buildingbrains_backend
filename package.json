@@ -7,7 +7,7 @@
     "url": "https://github.com/StattikRose/buildingbrains_backend"
   },
   "author": "Building Brains",
-  "license": "MIT",
+  "license": "Copy Right",
   "scripts": {
     "start": "node server.js",
     "test": "mocha --reporter spec"

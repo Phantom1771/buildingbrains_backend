@@ -14,7 +14,7 @@ const mongoose = require('mongoose')
 const expressValidator = require('express-validator')
 const expressStatusMonitor = require('express-status-monitor')
 const assert = require('assert')
-const cors = require("cors")
+const cors = require('cors')
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -28,6 +28,7 @@ const userController = require('./controllers/user')
 const hubController = require('./controllers/hub')
 const deviceController = require('./controllers/device')
 const groupController = require('./controllers/group')
+const automationController = require('./controllers/automation')
 
 /**
  * Create Express server.
@@ -96,6 +97,14 @@ server.post('/groups/addDevice', groupController.postAddDevice)
 server.get('/groups/:groupID', groupController.getGroup)
 server.post('/groups/removeDevice', groupController.postRemoveDevice)
 server.post('/groups/delete', groupController.postDelete)
+
+//Automation
+server.post('/automations/add', automationController.postAdd)
+server.post('/automations/', automationController.postAll)
+server.post('/automations/addDevice', automationController.postAddDevice)
+server.get('/automations/:automationID', automationController.getAutomation)
+server.post('/automations/removeDevice', automationController.postRemoveDevice)
+server.post('/automations/delete', automationController.postDelete)
 
 /**
  * Error Handler.

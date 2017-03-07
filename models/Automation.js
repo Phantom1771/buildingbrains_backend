@@ -6,7 +6,7 @@ const automationSchema = new mongoose.Schema({
   name: String,
   automations: [{
     device: {type: mongoose.Schema.Types.ObjectId, ref: 'Device'},
-    settings: Object
+    setting: String
   }]
 })
 

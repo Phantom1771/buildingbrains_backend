@@ -699,5 +699,20 @@ describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => 
 })
 
 /*descirbe('Add/sendCommand/Delete Automation', () => {
+  before((done) => {
+    Automation.remove({}, (err) => {
+      done()
+    })
+  })
 
+  it('should create an automation on a hub', (done) => {})
+  it('should get a list of all 1 automations on a hub', (done) => {})
+  it('should add a device and its settings to a hub', (done) => {})
+  it('should get a list of all 1 devices and their settings in an automation', (done) => {})
+  it('should update an automation', (done) => {})
+  it('should check the status of the updated 1 devices, (device func)', (done) => {})
+  it('should remove a device from an automation', (done) => {})
+  it('should get a list of all 0 devices and their settings in an automation', (done) => {})
+  it('should delete an automation from a hub', (done) => {})
+  it('should get a list of all 0 automations on a hub', (done) => {})
 })*/
