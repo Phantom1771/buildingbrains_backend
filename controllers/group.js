@@ -211,7 +211,43 @@ exports.postAddDevice = (req, res) => {
  * Authentication: Header x-access-token
  * JSON res: {result: 0/1, error: "xxx", devices: {device}}
  */
-exports.getGroup = (req, res) => {}
+exports.getGroup = (req, res) => {
+  const errors = req.validationErrors()
+
+  if (errors) {
+    res.json({result:1, error:errors})
+    return
+  }
+
+  var token = req.headers['x-access-token']
+
+  if(token){
+    // verifies secret and checks exp
+    jwt.verify(token, process.env.SECRET, function(err, decoded) {
+      if (err) {
+        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        return
+      }
+      else { // if everything is good
+        user = decoded._doc
+
+        Group.findOne({ _id: req.params.groupID}, (err, existingGroup) => {
+          if (existingGroup){
+              res.json({result: 0, error: "", devices: existingGroup.devices})
+          }
+          else{
+            res.json({result: 1, error: "Device not found"})
+            return
+          }
+        })
+      }
+    })
+  }
+  else{ // if there is no token return an error
+    res.json({ result: 1, error: 'No token provided.' })
+    return
+  }
+}
 
 /* 5.
  * POST /groups/removeDevice
@@ -220,7 +256,56 @@ exports.getGroup = (req, res) => {}
  * JSON req: {hubID: "xxx", groupID: "xxx", deviceID: "xxx"}
  * JSON res: {result: 0/1, error: "xxx"}
  */
- exports.postRemoveDevice = (req, res) => {}
+ exports.postRemoveDevice = (req, res) => {
+   req.assert('hubID', 'hubID is empty').notEmpty()
+   req.assert('groupID', 'groupID is empty').notEmpty()
+   req.assert('deviceID', 'deviceID is empty').notEmpty()
+
+   const errors = req.validationErrors()
+
+   if (errors) {
+     res.json({result:1, error:errors})
+     return
+   }
+
+   var token = req.headers['x-access-token']
+
+   if(token){
+     // verifies secret and checks exp
+     jwt.verify(token, process.env.SECRET, function(err, decoded) {
+       if (err) {
+         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         return
+       }
+       else { // if everything is good
+         user = decoded._doc
+
+         Group.findOne({_id: req.body.groupID, hub: req.body.hubID}, (err, existingGroup) => {
+           if (err) {
+             res.json({result:1, error:error})
+             return
+           }
+
+           if (existingGroup){
+             existingGroup.devices.pull(req.body.deviceID)
+             existingGroup.save()
+
+             res.json({result:0, error: ""})
+             return
+           }
+           else{
+             res.json({result:1, error:"A group matching this groupID could not be found."})
+             return
+           }
+         })
+       }
+     })
+   }
+   else{ // if there is no token return an error
+     res.json({ result: 1, error: 'No token provided.' })
+     return
+   }
+ }
 
 /* 6.
  * POST /groups/delete
@@ -229,4 +314,62 @@ exports.getGroup = (req, res) => {}
  * JSON req: {hubID: "xxx", groupID: "xxx"}
  * JSON res: {result: 0/1, error: "xxx"}
  */
- exports.postDelete = (req, res) => {}
+ exports.postDelete = (req, res) => {
+   req.assert('hubID', 'hubID is empty').notEmpty()
+   req.assert('groupID', 'groupID is empty').notEmpty()
+
+   const errors = req.validationErrors()
+
+   if (errors) {
+     res.json({result:1, error:errors})
+     return
+   }
+
+   var token = req.headers['x-access-token']
+
+   if(token){
+     // verifies secret and checks exp
+     jwt.verify(token, process.env.SECRET, function(err, decoded) {
+       if (err) {
+         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         return
+       }
+       else { // if everything is good
+         user = decoded._doc
+
+         Hub.findOne({_id: req.body.hubID, groups: req.body.groupID}, (err, existingHub) => {
+           if (err) {
+             res.json({result:1, error:error})
+             return
+           }
+
+           if (existingHub){
+             //Remove reference to group
+             existingHub.groups.pull(req.body.groupID)
+             existingHub.save()
+
+             //Remove Group from server
+             Group.remove({_id: req.body.groupID}, function(err) {
+               if(err){
+                 res.json({result:1, error: err})
+                 return
+               }
+               else{
+                 res.json({result:0, error:""})
+                 return
+               }
+             })
+           }
+           else{
+             res.json({result:1, error:"A hub matching this hubID with a group matching groupID could not be found."})
+             return
+           }
+         })
+       }
+     })
+   }
+   else{ // if there is no token return an error
+     res.json({ result: 1, error: 'No token provided.' })
+     return
+   }
+ }

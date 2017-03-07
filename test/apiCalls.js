@@ -614,7 +614,7 @@ describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => 
       })
   })
 
-  /*it('should get all of a groups 1 devices', (done) => {
+  it('should get all of a groups 1 devices', (done) => {
     chai.request(server)
       .get('/groups/'+groupID._id)
       .set('x-access-token', userToken)
@@ -679,7 +679,7 @@ describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => 
       })
   })
 
-  it('should get all of a hubs groups', (done) => {
+  it('should get all of a hubs 0 groups', (done) => {
     let req = {
       hubID: hubID1
     }
@@ -695,7 +695,7 @@ describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => 
         res.body.should.have.property('groups').length(0)
         done()
       })
-  })*/
+  })
 })
 
 /*descirbe('Add/sendCommand/Delete Automation', () => {
