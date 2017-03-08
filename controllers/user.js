@@ -319,7 +319,7 @@ exports.postUpdateProfile = (req, res, next) => {
  * POST users/account/password
  * Update profile information.
  * Authentication: header: x-access-token
- * JSON req: {newPassword: "xxx"}
+ * JSON req: {oldPassword: "xxx", newPassword: "xxx"}
  * JSON res: {result: 0/1, error: "xxx", token:"xxx"}
  */
 exports.postUpdatePassword = (req, res, next) => {
@@ -338,17 +338,26 @@ exports.postUpdatePassword = (req, res, next) => {
         return
       }
       else{
-        User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
+        User.findOne({ email: decoded._doc.email }, (err, existingUser) => {
           if (err) {
             res.json({result:1, error:error, userToken: ""})
             return
           }
-          else{
-              var newToken = jwt.sign(existingUser, process.env.SECRET, {
-              expiresIn : 60*60*24 // expires in 24 hours
-            })
-            res.json({ result:0, error:"", userToken:newToken})
-            return
+          if(existingUser){
+            existingUser.comparePassword(req.body.oldPassword, function(err, isMatch) {
+              if (isMatch) {
+                // if user is found and password is right create a token
+                var token = jwt.sign(existingUser, process.env.SECRET, {
+                expiresIn : 60*60*24 // expires in 24 hours
+                })
+                existingUser.password = req.body.newPassword
+                existingUser.save()
+                res.json({result:0, error:"", userToken: token})
+                return
+              }
+                res.json({result:1, error:"Password incorrect!"})
+                return
+          })
           }
         })
       }
