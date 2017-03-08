@@ -34,7 +34,7 @@ exports.postSignup = (req, res) => {
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) {
-      res.json({result:1, error:error})
+      res.json({result:1, error:err})
       return
     }
 
@@ -68,7 +68,7 @@ exports.postLogin = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -142,7 +142,7 @@ exports.postForgot = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -198,7 +198,7 @@ exports.postReset = (req, res, next) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -324,6 +324,13 @@ exports.postUpdateProfile = (req, res, next) => {
  */
 exports.postUpdatePassword = (req, res, next) => {
   req.assert('password', 'Password must be at least 4 characters long').len(4)
+  
+  const errors = req.validationErrors()
+
+  if (errors) {
+    res.json({result:1, error:errors[0].msg})
+    return
+  }
 
   var token = req.headers['x-access-token']
 
