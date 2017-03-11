@@ -53,6 +53,7 @@ describe('Create/Login/Logout User', () => {
 
    it('should update User password', (done) => {
      let req = {
+       oldPassword: "testPass",
        newPassword: "testPassNew"
      }
      chai.request(server)
