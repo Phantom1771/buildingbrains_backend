@@ -22,7 +22,7 @@ const dotenv = require('dotenv')
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors})
+     res.json({result:1, error:errors[0].msg})
      return
    }
 
@@ -89,7 +89,7 @@ exports.postAll = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -138,13 +138,13 @@ exports.postAll = (req, res) => {
  */
 exports.postAddDevice = (req, res) => {
   req.assert('hubID', 'hubID is empty').notEmpty()
-  req.assert('groupID', 'deviceID is empty').notEmpty()
+  req.assert('groupID', 'groupID is empty').notEmpty()
   req.assert('deviceID', 'deviceID is empty').notEmpty()
 
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -215,7 +215,7 @@ exports.getGroup = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -264,7 +264,7 @@ exports.getGroup = (req, res) => {
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors})
+     res.json({result:1, error:errors[0].msg})
      return
    }
 
@@ -321,7 +321,7 @@ exports.getGroup = (req, res) => {
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors})
+     res.json({result:1, error:errors[0].msg})
      return
    }
 
