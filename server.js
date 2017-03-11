@@ -103,6 +103,7 @@ server.post('/automations/add', automationController.postAdd)
 server.post('/automations/', automationController.postAll)
 server.post('/automations/addDevice', automationController.postAddDevice)
 server.get('/automations/:automationID', automationController.getAutomation)
+server.post('/automations/send', automationController.postSendCommands)
 server.post('/automations/removeDevice', automationController.postRemoveDevice)
 server.post('/automations/delete', automationController.postDelete)
 

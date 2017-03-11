@@ -21,7 +21,7 @@ exports.postSignup = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -68,7 +68,7 @@ exports.postLogin = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -142,7 +142,7 @@ exports.postForgot = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 
@@ -198,7 +198,7 @@ exports.postReset = (req, res, next) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors})
+    res.json({result:1, error:errors[0].msg})
     return
   }
 

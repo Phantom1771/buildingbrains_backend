@@ -19,7 +19,7 @@ exports.postAdd = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    return res.json({result:1, error:errors})
+    return res.json({result:1, error:errors[0].msg})
   }
 
   var token = req.headers['x-access-token']
@@ -89,7 +89,7 @@ exports.postDelete = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    return res.json({result:1, error:errors})
+    return res.json({result:1, error:errors[0].msg})
   }
 
   var token = req.headers['x-access-token']
@@ -148,7 +148,7 @@ exports.getAll = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    return res.json({result:1, error:errors})
+    return res.json({result:1, error:errors[0].msg})
   }
 
   var token = req.headers['x-access-token']
@@ -192,7 +192,7 @@ exports.postRegister = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    return res.json({result:1, error:errors})
+    return res.json({result:1, error:errors[0].msg})
   }
 
   const hub = new Hub({

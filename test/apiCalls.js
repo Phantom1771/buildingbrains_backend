@@ -8,6 +8,7 @@ const User = require('../models/User')
 const Hub = require('../models/Hub')
 const Device = require('../models/Device')
 const Group = require('../models/Group')
+const Automation = require('../models/Automation')
 
 chai.use(chaiHttp)
 
@@ -19,6 +20,8 @@ var hubID2 = ""
 var deviceID1 = ""
 var deviceID2 = ""
 var groupID = ""
+var automationID = ""
+var autoID = ""
 
 describe('Create/Login/Logout User', () => {
   before((done) => {
@@ -698,21 +701,199 @@ describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => 
   })
 })
 
-/*descirbe('Add/sendCommand/Delete Automation', () => {
+describe('Add/AddDevice/sendCommand/removeDevice/Delete Automation', () => {
   before((done) => {
     Automation.remove({}, (err) => {
       done()
     })
   })
 
-  it('should create an automation on a hub', (done) => {})
-  it('should get a list of all 1 automations on a hub', (done) => {})
-  it('should add a device and its settings to a hub', (done) => {})
-  it('should get a list of all 1 devices and their settings in an automation', (done) => {})
-  it('should update an automation', (done) => {})
-  it('should check the status of the updated 1 devices, (device func)', (done) => {})
-  it('should remove a device from an automation', (done) => {})
-  it('should get a list of all 0 devices and their settings in an automation', (done) => {})
-  it('should delete an automation from a hub', (done) => {})
-  it('should get a list of all 0 automations on a hub', (done) => {})
-})*/
+  it('should create an automation on a hub', (done) => {
+    let req = {
+      hubID: hubID1,
+      automationName: "testAutomation"
+    }
+    chai.request(server)
+      .post('/automations/add')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should get a list of all 1 automations on a hub', (done) => {
+    let req = {
+      hubID: hubID1
+    }
+    chai.request(server)
+      .post('/automations/')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('automations').length(1)
+        automationID = res.body.automations[0]
+        done()
+      })
+  })
+
+  it('should add a device and its settings to an automation', (done) => {
+    let req = {
+      hubID: hubID1,
+      automationID: automationID,
+      deviceID: deviceID1,
+      setting: "ON"
+    }
+    chai.request(server)
+      .post('/automations/addDevice')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should get a list of all 1 devices and their settings in an automation', (done) => {
+    chai.request(server)
+      .get('/automations/'+automationID._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('devices').length(1)
+        autoID = res.body.devices[0]._id
+        done()
+      })
+  })
+
+  it('should check the status of the updated 1 devices, (device func)', (done) => {
+    chai.request(server)
+      .get('/devices/'+deviceID1._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('device')
+        res.body.device.should.have.property('state').eql("OFF")
+        done()
+      })
+  })
+
+  it('should update an automation', (done) => {
+    let req = {
+      hubID: hubID1,
+      automationID: automationID,
+    }
+    chai.request(server)
+      .post('/automations/send')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should check the status of the updated 1 devices, (device func)', (done) => {
+    chai.request(server)
+      .get('/devices/'+deviceID1._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('device')
+        res.body.device.should.have.property('state').eql("ON")
+        done()
+      })
+  })
+
+  it('should remove a device from an automation', (done) => {
+    let req = {
+      hubID: hubID1,
+      automationID: automationID,
+      autoID: autoID
+    }
+    chai.request(server)
+      .post('/automations/removeDevice')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should get a list of all 0 devices and their settings in an automation', (done) => {
+    chai.request(server)
+      .get('/automations/'+automationID._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('devices').length(0)
+        done()
+      })
+  })
+
+  it('should delete an automation from a hub', (done) => {
+    let req = {
+      hubID: hubID1,
+      automationID: automationID
+    }
+    chai.request(server)
+      .post('/automations/delete')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        done()
+      })
+  })
+
+  it('should get a list of all 0 automations on a hub', (done) => {
+    let req = {
+      hubID: hubID1
+    }
+    chai.request(server)
+      .post('/automations/')
+      .set('x-access-token', userToken)
+      .send(req)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('automations').length(0)
+        done()
+      })
+  })
+})
