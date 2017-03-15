@@ -250,9 +250,10 @@ exports.postNearby = (req, res) => {
                if (existingHub) {
                  if (existingDevice.name == null) {
                    existingDevice.name = req.body.deviceName
-                   existingDevice.registered = true
-                   existingDevice.save()
                  }
+                 existingDevice.registered = true
+                 existingDevice.save()
+                 
                  //This gets rid of ducplicates
                  existingHub.devices.pull(existingDevice)
                  existingHub.devices.push(existingDevice)
@@ -292,6 +293,7 @@ exports.postNearby = (req, res) => {
  exports.postUpdate = (req, res) => {
    req.assert('hubID', 'hubID is empty').notEmpty()
    req.assert('deviceID', 'deviceID is empty').notEmpty()
+   req.assert('deviceSettings', 'deviceSettings is empty').notEmpty()
 
    const errors = req.validationErrors()
 
