@@ -253,7 +253,7 @@ exports.postNearby = (req, res) => {
                  }
                  existingDevice.registered = true
                  existingDevice.save()
-                 
+
                  //This gets rid of ducplicates
                  existingHub.devices.pull(existingDevice)
                  existingHub.devices.push(existingDevice)
@@ -385,6 +385,7 @@ exports.postNearby = (req, res) => {
 
            if (existingDevice){
              existingDevice.registered = false;
+             existingDevice.name = null;
              existingDevice.save()
 
              res.json({result:0, error: ""})
