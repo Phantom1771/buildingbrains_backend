@@ -37,20 +37,11 @@ exports.postAll = (req, res) => {
         user = decoded._doc
 
         Device.find({ hub: req.body.hubID, registered: true}, (err, existingDevices) => {
+          if(err){
+            res.json({ result: 1, error: err })
+            return
+          }
           if (existingDevices){
-            for(var i=0; i < existingDevices.length; i++){
-              Device.findOne({ _id: existingDevices[i]._id}, (err, existingDevice) => {
-                request.get(existingDevice.link, function(err, response, body) {
-                  existingDevice.state = JSON.parse(body).state
-                  existingDevice.save((err) => {
-                    if (err) {
-                      res.json({result:1, error:err})
-                      return
-                    }
-                  })
-                })
-              })
-            }
             res.json({result: 0, error: "", devices: existingDevices})
             return
           }
@@ -96,18 +87,8 @@ exports.getDevice = (req, res) => {
 
         Device.findOne({ _id: req.params.deviceID}, (err, existingDevice) => {
           if (existingDevice){
-            request.get(existingDevice.link, function(err, response, body) {
-              existingDevice.state = JSON.parse(body).state
-
-              existingDevice.save((err) => {
-                if (err) {
-                  res.json({result:1, error:err})
-                  return
-                }
-                res.json({result:0, error:"", device: existingDevice})
-                return
-              })
-            })
+            res.json({result:0, error:"", device: existingDevice})
+            return
           }
           else{
             res.json({result: 1, error: "Device not found"})
@@ -207,40 +188,6 @@ exports.postNearby = (req, res) => {
            }
 
            if (existingDevice){
-             //Update device info
-             request.get(existingDevice.link, function(err, response, body) {
-
-               existingDevice.state = JSON.parse(body).state
-               existingDevice.category = JSON.parse(body).category
-               existingDevice.type = JSON.parse(body).type
-
-               if(existingDevice.type == "Switch"){
-                 existingDevice.params = ["ON","OFF"]
-               }
-               else if(existingDevice.type == "Dimmer"){
-                 existingDevice.params = ["percent"]
-               }
-               else if(existingDevice.type == "Color"){
-                 existingDevice.params = ["float,float,float"]
-               }
-               else if(existingDevice.type == "Number"){
-                 existingDevice.params = ["float"]
-               }
-               else if(existingDevice.type == "Contact"){
-                 existingDevice.params = ["OPEN", "CLOSED"]
-               }
-               else{
-                 existingDevice.params = []
-               }
-
-               existingDevice.save((err) => {
-                 if (err) {
-                   res.json({result:1, error:err})
-                   return
-                 }
-               })
-             })
-            //Then add to hub
              Hub.findOne({ _id:req.body.hubID}, (err, existingHub) => {
                if (err) {
                  res.json({result:1, error:error})
@@ -250,9 +197,10 @@ exports.postNearby = (req, res) => {
                if (existingHub) {
                  if (existingDevice.name == null) {
                    existingDevice.name = req.body.deviceName
-                   existingDevice.registered = true
-                   existingDevice.save()
                  }
+                 existingDevice.registered = true
+                 existingDevice.save()
+
                  //This gets rid of ducplicates
                  existingHub.devices.pull(existingDevice)
                  existingHub.devices.push(existingDevice)
@@ -286,12 +234,13 @@ exports.postNearby = (req, res) => {
  * POST devices/update
  * Updates the device status
  * Authentication: header: x-access-token
- * JSON req: {hubID: "xxx", deviceID: "xxx", deviceSettings: {settings}}
+ * JSON req: {hubID: "xxx", deviceID: "xxx", deviceSetting: {settings}}
  * JSON res: {result: 0/1, error: "xxx"}
  */
  exports.postUpdate = (req, res) => {
    req.assert('hubID', 'hubID is empty').notEmpty()
    req.assert('deviceID', 'deviceID is empty').notEmpty()
+   req.assert('deviceSetting', 'deviceSettings is empty').notEmpty()
 
    const errors = req.validationErrors()
 
@@ -312,27 +261,34 @@ exports.postNearby = (req, res) => {
        else { // if everything is good
          user = decoded._doc
 
-         Device.findOne({ _id: req.body.deviceID, hub: req.body.hubID}, (err, existingDevice) => {
-           if (existingDevice){
-             request.post({url:existingDevice.link, body:req.body.deviceSettings}, function(err, response, body) {
-               if(response.statusCode !== 200){
-                 res.json({result: 1, error: "Bad request to the Hub"})
-                 return
-               }
-               existingDevice.state = req.body.deviceSettings
-               existingDevice.save((err, modified_device) => {
-                 if (err) {
-                   res.json({result: 1, error: err})
-                   return
-                 }
+         Hub.findOne({ _id: req.body.hubID}, (err, existingHub) => {
+           if(existingHub){
+           Device.findOne({ _id: req.body.deviceID, hub: req.body.hubID}, (err, existingDevice) => {
+             if (existingDevice){
+                 const update = new Update({
+                   hubCode: existingHub.hubCode,
+                   deviceLink: existingDevice.link,
+                   setting: req.body.deviceSetting
+                 })
+                 update.save()
+                 existingDevice.state = req.body.deviceSetting
+                 existingDevice.save((err, modified_device) => {
+                   if (err) {
+                     res.json({result: 1, error: err})
+                     return
+                   }
 
-                 res.json({result: 0, error: "", devices: modified_device})
-                 return
-               })
+                   res.json({result: 0, error: "", device: modified_device})
+                   return
+                 })
+               }
+               else{
+                 res.json({result:1, error: "Device not found or isnt registered to this hub"})
+               }
              })
            }
            else{
-             res.json({result: 1, error: "Device not found or isnt registered to this hub"})
+             res.json({result: 1, error: 'Hub not found'})
              return
            }
          })
@@ -408,12 +364,15 @@ exports.postNearby = (req, res) => {
   * THIS CALL IS ONLY FOR THE HUB
   * Sends device information to backend,
   * deviceLink is the devices link relative to the hub
-  * JSON req: {deviceLink: "xxx", hubCode: "xxx"}
+  * JSON req: {deviceLink: "xxx", hubCode: "xxx", state: "xxx", category: "xxx", type: "xxx"}
   * JSON res: {result: 0/1, error: "xxx"}
   */
   exports.postRegister = (req, res) => {
     req.assert('deviceLink', 'deviceLink is empty').notEmpty()
     req.assert('hubCode', 'hubCode is empty').notEmpty()
+    req.assert('state', 'state is empty').notEmpty()
+    req.assert('category', 'category is empty').notEmpty()
+    req.assert('type', 'type is empty').notEmpty()
 
     const errors = req.validationErrors()
 
@@ -432,8 +391,30 @@ exports.postNearby = (req, res) => {
         const device = new Device({
           link:req.body.deviceLink,
           hub: existingHub._id,
+          state: req.body.state,
+          category: req.body.category,
+          type: req.body.type,
           registered: false
         })
+
+        if(req.body.type == "Switch"){
+          device.params = ["ON","OFF"]
+        }
+        else if(req.body.type == "Dimmer"){
+          device.params = ["percent"]
+        }
+        else if(req.body.type == "Color"){
+          device.params = ["float,float,float"]
+        }
+        else if(req.body.type == "Number"){
+          device.params = ["float"]
+        }
+        else if(req.body.type == "Contact"){
+          device.params = ["OPEN", "CLOSED"]
+        }
+        else{
+          device.params = []
+        }
 
         device.save((err) => {
           if (err) {

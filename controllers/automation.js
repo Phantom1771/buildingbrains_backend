@@ -287,26 +287,39 @@ exports.postSendCommands = (req, res) => {
           }
 
           if (existingAutomation){
-            for(var i=0; i < existingAutomation.automations.length; i++){
-              var setting = existingAutomation.automations[i].setting
-              Device.findOne({ _id: existingAutomation.automations[i].device, hub: req.body.hubID}, (err, existingDevice) => {
-                if (existingDevice){
-                  request.post({url:existingDevice.link, body:setting}, function(err, response, body) {
-                    if(response.statusCode !== 200){
-                      res.json({result: 1, error: "Bad request to the Hub"})
+            Hub.findOne({ _id: req.body.hubID}, function(err, existingHub){
+              if(existingHub){
+                for(var i=0; i < existingAutomation.automations.length; i++){
+                  var setting = existingAutomation.automations[i].setting
+                  Device.findOne({ _id: existingAutomation.automations[i].device, hub: req.body.hubID}, (err, existingDevice) => {
+                    if (existingDevice){
+                      const update = new Update({
+                        hubCode:existingHub.hubCode,
+                        deviceLink: existingDevice.link,
+                        setting: setting
+                      })
+
+                      update.save()
+                      existingDevice.state = setting
+                      existingDevice.save()
+                    }
+                    else{
+                      res.json({result: 1, error: "Device not found or isnt registered to this hub"})
                       return
                     }
-                    existingDevice.state = setting
-                    existingDevice.save()
                   })
                 }
-                else{
-                  res.json({result: 1, error: "Device not found or isnt registered to this hub"})
-                  return
-                }
-              })
-            }
-            res.json({result: 0, error: ""})
+                res.json({result: 0, error: ""})
+                return
+              }
+              else{
+                res.json({result: 1, error: "Hub not found"})
+                return
+              }
+            })
+          }
+          else{
+            res.json({result: 1, error: "Automation not found"})
             return
           }
         })
