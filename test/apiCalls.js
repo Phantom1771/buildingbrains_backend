@@ -308,7 +308,10 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
   it('should register a new device with the server', (done) => {
     let req = {
       deviceLink: "http://demo.openhab.org:8080/rest/items/Heating_GF_Toilet",
-      hubCode: hubCode1
+      hubCode: hubCode1,
+      state: "OFF",
+      category: "heating",
+      type: "Switch"
     }
     chai.request(server)
      .post('/devices/register')
@@ -324,7 +327,10 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
   it('should register a second new device with the server', (done) => {
     let req = {
       deviceLink: "http://demo.openhab.org:8080/rest/items/Light_FF_Child_Ceiling",
-      hubCode: hubCode1
+      hubCode: hubCode1,
+      state: "OFF",
+      category: "undefined",
+      type: "Switch"
     }
     chai.request(server)
      .post('/devices/register')

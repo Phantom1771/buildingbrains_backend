@@ -284,6 +284,7 @@ exports.postNearby = (req, res) => {
                }
                else{
                  res.json({result:1, error: "Device not found or isnt registered to this hub"})
+                 return
                }
              })
            }
