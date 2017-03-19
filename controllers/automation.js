@@ -288,10 +288,20 @@ exports.postSendCommands = (req, res) => {
 
           if (existingAutomation){
             Hub.findOne({ _id: req.body.hubID}, function(err, existingHub){
+              if (err) {
+                res.status(400).json({result:1, error:err})
+                return
+              }
+
               if(existingHub){
-                for(var i=0; i < existingAutomation.automations.length; i++){
-                  var setting = existingAutomation.automations[i].setting
-                  Device.findOne({ _id: existingAutomation.automations[i].device, hub: req.body.hubID}, (err, existingDevice) => {
+                async.each(existingAutomation.automations, function(automation, callback){
+                  var setting = automation.setting
+                  Device.findOne({ _id: automation.device, hub: req.body.hubID}, (err, existingDevice) => {
+                    if (err) {
+                      res.status(400).json({result:1, error:err})
+                      return
+                    }
+
                     if (existingDevice){
                       const update = new Update({
                         hubCode:existingHub.hubCode,
@@ -299,29 +309,41 @@ exports.postSendCommands = (req, res) => {
                         setting: setting
                       })
 
-                      update.save()
-                      existingDevice.state = setting
-                      existingDevice.save()
+                      async.parallel([
+                        function(callback){
+                          existingDevice.state = setting
+                          existingDevice.save(callback)
+                        },
+                        function(callback){
+                          update.save(callback)
+                        },
+                      ])
+
+                      // update.save(function(err){
+                      //   existingDevice.state = setting
+                      //   existingDevice.save(function(err){
+                      //     console.log("saved automation "+automation._id)
+                      //     callback()
+                      //   })
+                      //   callback()
+                      // })
                     }
                     else{
-                      res.status(400).json({result:1, error: "Device not found or isnt registered to this hub"})
+                      res.status(400).json({result:1, error: "Device "+automation.device.link+" not found or isnt registered to this hub"})
                       return
                     }
+                    callback()
                   })
-                }
                 res.status(200).json({result:0, error: ""})
                 return
-              }
-              else{
-                res.status(400).json({result:1, error: "Hub not found"})
-                return
-              }
-            })
-          }
-          else{
-            res.status(400).json({result:1, error: "Automation not found"})
-            return
-          }
+              })
+            }
+          })
+        }
+        else{
+          res.status(400).json({result:1, error: "Automation not found"})
+          return
+        }
         })
       }
     })

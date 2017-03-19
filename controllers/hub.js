@@ -278,7 +278,11 @@ exports.postCheckUpdates = (req, res) => {
 
         if (existingUpdates) {
           res.status(200).json({result:0, error: "", updates: existingUpdates})
-          Update.remove(existingUpdates)
+          async.each(existingUpdates, function(existingUpdate, callback) {
+            Update.remove({_id: existingUpdate._id}, function(err){
+              callback()
+            })
+          })
           return
         }
 

@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const User = require('../models/User')
 const Hub = require('../models/Hub')
 const Device = require('../models/Device')
+const Update = require('../models/Update')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 const request = require('request')
@@ -240,7 +241,7 @@ exports.postNearby = (req, res) => {
  exports.postUpdate = (req, res) => {
    req.assert('hubID', 'hubID is empty').notEmpty()
    req.assert('deviceID', 'deviceID is empty').notEmpty()
-   req.assert('deviceSetting', 'deviceSettings is empty').notEmpty()
+   req.assert('deviceSetting', 'deviceSetting is empty').notEmpty()
 
    const errors = req.validationErrors()
 
@@ -384,7 +385,7 @@ exports.postNearby = (req, res) => {
 
     Hub.findOne({ hubCode:req.body.hubCode}, (err, existingHub) => {
       if (err) {
-        res.status(400).json({result:1, error:error})
+        res.status(400).json({result:1, error:err.errmsg})
         return
       }
 
@@ -419,7 +420,7 @@ exports.postNearby = (req, res) => {
 
         device.save((err) => {
           if (err) {
-            res.status(400).json({result:1, error:err})
+            res.status(400).json({result:1, error:err.errmsg})
             return
           }
           res.status(200).json({result:0, error:""})
