@@ -20,7 +20,7 @@ exports.postAdd = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -30,7 +30,7 @@ exports.postAdd = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -38,14 +38,14 @@ exports.postAdd = (req, res) => {
 
         Hub.findOne({ hubCode:req.body.hubCode}, (err, existingHub) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
 
           if (existingHub) {
             User.findOne({ _id:user._id}, (err, existingUser) => {
               if (err) {
-                res.json({result:1, error:error})
+                res.status(400).json({result:1, error:error})
                 return
               }
 
@@ -64,17 +64,17 @@ exports.postAdd = (req, res) => {
                 existingUser.save()
                 existingHub.save()
 
-                res.json({result:0, error:"", hub: existingHub, user: existingUser})
+                res.status(200).json({result:0, error:"", hub: existingHub, user: existingUser})
                 return
               }
               else{
-                res.json({result:1, error:"User could not be found, hub could not be added."})
+                res.status(400).json({result:1, error:"User could not be found, hub could not be added."})
                 return
               }
             })
           }
           else{
-            res.json({result:1, error:"A hub matching this hubCode could not be found."})
+            res.status(400).json({result:1, error:"A hub matching this hubCode could not be found."})
             return
           }
         })
@@ -82,7 +82,7 @@ exports.postAdd = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -100,7 +100,7 @@ exports.postDelete = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -110,7 +110,7 @@ exports.postDelete = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -118,14 +118,14 @@ exports.postDelete = (req, res) => {
 
         Hub.findOne({ _id:req.body.hubID}, (err, existingHub) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
 
           if (existingHub) {
             User.findOne({ _id:user._id}, (err, existingUser) => {
               if (err) {
-                res.json({result:1, error:error})
+                res.status(400).json({result:1, error:error})
                 return
               }
 
@@ -136,17 +136,17 @@ exports.postDelete = (req, res) => {
                 existingUser.save()
                 existingHub.save()
 
-                res.json({result:0, error:""})
+                res.status(200).json({result:0, error:""})
                 return
               }
               else{
-                res.json({result:1, error:"User could not be found, hub could not be added."})
+                res.status(400).json({result:1, error:"User could not be found, hub could not be added."})
                 return
               }
             })
           }
           else{
-            res.json({result:1, error:"A hub matching this hubID could not be found."})
+            res.status(400).json({result:1, error:"A hub matching this hubID could not be found."})
             return
           }
         })
@@ -154,7 +154,7 @@ exports.postDelete = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -169,7 +169,7 @@ exports.getAll = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -179,7 +179,7 @@ exports.getAll = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -191,7 +191,7 @@ exports.getAll = (req, res) => {
             return
           }
           else{
-            res.json({ result: 1, error: "User not found"})
+            res.status(400).json({result:1, error: "User not found"})
             return
           }
         })
@@ -199,7 +199,7 @@ exports.getAll = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -210,17 +210,16 @@ exports.getAll = (req, res) => {
  * Sends hub information to backend,
  * address is the hubs IP address
  * hubCode is the code that hub and user have (printed on bottom of the hub)
- * JSON req: {address: "xxx", hubCode: "xxx"}
+ * JSON req: {hubCode: "xxx"}
  * JSON res: {result: 0/1, error: "xxx"}
  */
 exports.postRegister = (req, res) => {
-  req.assert('address', 'Address is empty').notEmpty()
   req.assert('hubCode', 'hubCode is empty').notEmpty()
 
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -231,18 +230,18 @@ exports.postRegister = (req, res) => {
 
   Hub.findOne({ hubCode:req.body.hubCode}, (err, existingHub) => {
     if (err) {
-      res.json({result:1, error:error})
+      res.status(400).json({result:1, error:error})
       return
     }
 
     if (existingHub) {
-      res.json({result:1, error:'This Hub has already been registered'})
+      res.status(400).json({result:1, error:'This Hub has already been registered'})
       return
     }
 
     hub.save((err) => {
-      if (err) { return res.json({result:1, error:err}) }
-      res.json({result:0, error:""})
+      if (err) { return res.status(400).json({result:1, error:err}) }
+      res.status(200).json({result:0, error:""})
       return
     })
   })
@@ -261,24 +260,36 @@ exports.postCheckUpdates = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
-
-  Update.find({ hubCode: req.body.hubCode}, (err, existingUpdates) => {
-    if (err) {
-      res.json({result:1, error:error})
+  Hub.findOne({hubCode: req.body.hubCode}, (err, existingHub) => {
+    if(err){
+      res.status(400).json({result:1, error:error})
       return
     }
 
-    if (existingUpdates) {
-      res.json({result:0, error: "", updates: existingUpdates})
-      Update.remove(existingUpdates)
-      return
-    }
+    if(existingHub){
+      Update.find({ hubCode: req.body.hubCode}, (err, existingUpdates) => {
+        if (err) {
+          res.status(400).json({result:1, error:error})
+          return
+        }
 
+        if (existingUpdates) {
+          res.status(200).json({result:0, error: "", updates: existingUpdates})
+          Update.remove(existingUpdates)
+          return
+        }
+
+        else{
+          res.status(400).json({result:1, error: "No current updates to return"})
+          return
+        }
+      })
+    }
     else{
-      res.json({result:1, error: "No current updates to return"})
+      res.status(400).json({result:1, error:"No hub with that HubCode Registered"})
       return
     }
   })

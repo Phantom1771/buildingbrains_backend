@@ -80,6 +80,7 @@ server.post('/hubs/register', hubController.postRegister)
 server.post('/hubs/add', hubController.postAdd)
 server.post('/hubs/delete', hubController.postDelete)
 server.get('/hubs/', hubController.getAll)
+server.post('/hubs/checkUpdates', hubController.postCheckUpdates)
 
 //Device
 server.post('/devices/register', deviceController.postRegister)

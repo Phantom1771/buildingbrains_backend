@@ -22,7 +22,7 @@ const dotenv = require('dotenv')
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors[0].msg})
+     res.status(400).json({result:1, error:errors[0].msg})
      return
    }
 
@@ -32,7 +32,7 @@ const dotenv = require('dotenv')
      // verifies secret and checks exp
      jwt.verify(token, process.env.SECRET, function(err, decoded) {
        if (err) {
-         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         res.status(400).json({result:1, error: 'Failed to authenticate token.' })
          return
        }
        else { // if everything is good
@@ -40,7 +40,7 @@ const dotenv = require('dotenv')
 
          Hub.findOne({_id: req.body.hubID}, (err, existingHub) => {
            if (err) {
-             res.json({result:1, error:error})
+             res.status(400).json({result:1, error:error})
              return
            }
            if (existingHub){
@@ -55,15 +55,15 @@ const dotenv = require('dotenv')
 
              group.save((err) => {
                if (err) {
-                 res.json({result:1, error:err})
+                 res.status(400).json({result:1, error:err})
                  return
                }
-               res.json({result:0, error:""})
+               res.status(200).json({result:0, error:""})
                return
              })
            }
            else{
-             res.json({result:1, error:"A hub matching this hubID could not be found"})
+             res.status(400).json({result:1, error:"A hub matching this hubID could not be found"})
              return
            }
          })
@@ -71,7 +71,7 @@ const dotenv = require('dotenv')
      })
    }
    else{ // if there is no token return an error
-     res.json({ result: 1, error: 'No token provided.' })
+     res.status(400).json({result:1, error: 'No token provided.' })
      return
    }
  }
@@ -89,7 +89,7 @@ exports.postAll = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -99,7 +99,7 @@ exports.postAll = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -107,7 +107,7 @@ exports.postAll = (req, res) => {
 
         Group.find({ hub: req.body.hubID}, (err, existingGroups) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
 
@@ -116,7 +116,7 @@ exports.postAll = (req, res) => {
             return
           }
           else{
-            res.json({result: 1, error: "Hub not found"})
+            res.status(400).json({result:1, error: "Hub not found"})
             return
           }
         })
@@ -124,7 +124,7 @@ exports.postAll = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -144,7 +144,7 @@ exports.postAddDevice = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -154,7 +154,7 @@ exports.postAddDevice = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -162,14 +162,14 @@ exports.postAddDevice = (req, res) => {
 
         Group.findOne({_id: req.body.groupID, hub: req.body.hubID}, (err, existingGroup) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
 
           if (existingGroup){
             Device.findOne({ _id:req.body.deviceID, hub: req.body.hubID}, (err, existingDevice) => {
               if (err) {
-                res.json({result:1, error:error})
+                res.status(400).json({result:1, error:error})
                 return
               }
               if(existingDevice){
@@ -178,21 +178,21 @@ exports.postAddDevice = (req, res) => {
 
                 existingGroup.save((err) => {
                   if (err) {
-                    res.json({result:1, error:err})
+                    res.status(400).json({result:1, error:err})
                     return
                   }
-                  res.json({result:0, error:""})
+                  res.status(200).json({result:0, error:""})
                   return
                 })
               }
               else{
-                res.json({result:1, error:"A device matching this deviceID could not be found on this hub."})
+                res.status(400).json({result:1, error:"A device matching this deviceID could not be found on this hub."})
                 return
               }
             })
           }
           else{
-            res.json({result:1, error:"A group matching this groupID could not be found on this Hub."})
+            res.status(400).json({result:1, error:"A group matching this groupID could not be found on this Hub."})
             return
           }
         })
@@ -200,7 +200,7 @@ exports.postAddDevice = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -215,7 +215,7 @@ exports.getGroup = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -225,7 +225,7 @@ exports.getGroup = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -236,7 +236,7 @@ exports.getGroup = (req, res) => {
               res.json({result: 0, error: "", devices: existingGroup.devices})
           }
           else{
-            res.json({result: 1, error: "Device not found"})
+            res.status(400).json({result:1, error: "Device not found"})
             return
           }
         })
@@ -244,7 +244,7 @@ exports.getGroup = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -264,7 +264,7 @@ exports.getGroup = (req, res) => {
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors[0].msg})
+     res.status(400).json({result:1, error:errors[0].msg})
      return
    }
 
@@ -274,7 +274,7 @@ exports.getGroup = (req, res) => {
      // verifies secret and checks exp
      jwt.verify(token, process.env.SECRET, function(err, decoded) {
        if (err) {
-         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         res.status(400).json({result:1, error: 'Failed to authenticate token.' })
          return
        }
        else { // if everything is good
@@ -282,7 +282,7 @@ exports.getGroup = (req, res) => {
 
          Group.findOne({_id: req.body.groupID, hub: req.body.hubID}, (err, existingGroup) => {
            if (err) {
-             res.json({result:1, error:error})
+             res.status(400).json({result:1, error:error})
              return
            }
 
@@ -290,11 +290,11 @@ exports.getGroup = (req, res) => {
              existingGroup.devices.pull(req.body.deviceID)
              existingGroup.save()
 
-             res.json({result:0, error: ""})
+             res.status(200).json({result:0, error: ""})
              return
            }
            else{
-             res.json({result:1, error:"A group matching this groupID could not be found."})
+             res.status(400).json({result:1, error:"A group matching this groupID could not be found."})
              return
            }
          })
@@ -302,7 +302,7 @@ exports.getGroup = (req, res) => {
      })
    }
    else{ // if there is no token return an error
-     res.json({ result: 1, error: 'No token provided.' })
+     res.status(400).json({result:1, error: 'No token provided.' })
      return
    }
  }
@@ -321,7 +321,7 @@ exports.getGroup = (req, res) => {
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors[0].msg})
+     res.status(400).json({result:1, error:errors[0].msg})
      return
    }
 
@@ -331,7 +331,7 @@ exports.getGroup = (req, res) => {
      // verifies secret and checks exp
      jwt.verify(token, process.env.SECRET, function(err, decoded) {
        if (err) {
-         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         res.status(400).json({result:1, error: 'Failed to authenticate token.' })
          return
        }
        else { // if everything is good
@@ -339,7 +339,7 @@ exports.getGroup = (req, res) => {
 
          Hub.findOne({_id: req.body.hubID, groups: req.body.groupID}, (err, existingHub) => {
            if (err) {
-             res.json({result:1, error:error})
+             res.status(400).json({result:1, error:error})
              return
            }
 
@@ -351,17 +351,17 @@ exports.getGroup = (req, res) => {
              //Remove Group from server
              Group.remove({_id: req.body.groupID}, function(err) {
                if(err){
-                 res.json({result:1, error: err})
+                 res.status(400).json({result:1, error: err})
                  return
                }
                else{
-                 res.json({result:0, error:""})
+                 res.status(200).json({result:0, error:""})
                  return
                }
              })
            }
            else{
-             res.json({result:1, error:"A hub matching this hubID with a group matching groupID could not be found."})
+             res.status(400).json({result:1, error:"A hub matching this hubID with a group matching groupID could not be found."})
              return
            }
          })
@@ -369,7 +369,7 @@ exports.getGroup = (req, res) => {
      })
    }
    else{ // if there is no token return an error
-     res.json({ result: 1, error: 'No token provided.' })
+     res.status(400).json({result:1, error: 'No token provided.' })
      return
    }
  }

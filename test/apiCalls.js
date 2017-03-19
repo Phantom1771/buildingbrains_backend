@@ -94,7 +94,7 @@ describe('Create/Login/Logout User', () => {
        .set('x-access-token', userToken)
        .send(req)
        .end((err, res) => {
-          res.should.have.status(200)
+          res.should.have.status(400)
           res.body.should.be.a('object')
           res.body.should.have.property('result').eql(1)
           res.body.should.have.property('error')
