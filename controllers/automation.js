@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const User = require('../models/User')
 const Hub = require('../models/Hub')
 const Device = require('../models/Device')
+const Update = require('../models/Update')
 const Automation = require('../models/Automation')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
@@ -296,61 +297,44 @@ exports.postSendCommands = (req, res) => {
               if(existingHub){
                 async.each(existingAutomation.automations, function(automation, callback){
                   var setting = automation.setting
-                  Device.findOne({ _id: automation.device, hub: req.body.hubID}, (err, existingDevice) => {
+                  var hub = existingHub
+                  Device.findOne({ _id: automation.device, hub: req.body.hubID}, function(err, existingDevice){
                     if (err) {
                       res.status(400).json({result:1, error:err})
                       return
                     }
 
-                    if (existingDevice){
+                    if(existingDevice){
                       const update = new Update({
-                        hubCode:existingHub.hubCode,
+                        hubCode:hub.hubCode,
                         deviceLink: existingDevice.link,
                         setting: setting
                       })
+                      update.save()
 
-                      async.parallel([
-                        function(callback){
-                          existingDevice.state = setting
-                          existingDevice.save(callback)
-                        },
-                        function(callback){
-                          update.save(callback)
-                        },
-                      ])
-
-                      // update.save(function(err){
-                      //   existingDevice.state = setting
-                      //   existingDevice.save(function(err){
-                      //     console.log("saved automation "+automation._id)
-                      //     callback()
-                      //   })
-                      //   callback()
-                      // })
+                      existingDevice.state = setting
+                      existingDevice.save()
+                      callback()
                     }
-                    else{
-                      res.status(400).json({result:1, error: "Device "+automation.device.link+" not found or isnt registered to this hub"})
-                      return
-                    }
-                    callback()
                   })
-                res.status(200).json({result:0, error: ""})
-                return
-              })
-            }
-          })
-        }
-        else{
-          res.status(400).json({result:1, error: "Automation not found"})
-          return
-        }
+
+
+                }, function(err){
+                  if(err){
+                    res.status(400).json({result:1, error:err})
+                    return
+                  }
+                  else{
+                    res.status(200).json({result:0, error: ""})
+                    return
+                  }
+                })
+              }
+            })
+          }
         })
       }
     })
-  }
-  else{ // if there is no token return an error
-    res.status(400).json({result:1, error: 'No token provided.' })
-    return
   }
 }
 
