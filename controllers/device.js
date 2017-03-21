@@ -341,6 +341,7 @@ exports.postNearby = (req, res) => {
 
            if (existingDevice){
              existingDevice.registered = false;
+             existingDevice.name = null;
              existingDevice.save()
 
              res.status(200).json({result:0, error: ""})
