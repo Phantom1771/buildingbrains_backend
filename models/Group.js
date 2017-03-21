@@ -7,7 +7,7 @@ const groupSchema = new mongoose.Schema({
   devices: [{type: mongoose.Schema.Types.ObjectId, ref: 'Device'}],
   hub: String,
   type: String
-})
+}, { timestamps: true })
 
 const Group = mongoose.model('Group', groupSchema)
 module.exports = Group

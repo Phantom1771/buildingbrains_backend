@@ -9,7 +9,7 @@ const automationSchema = new mongoose.Schema({
     device: {type: mongoose.Schema.Types.ObjectId, ref: 'Device'},
     setting: String
   }]
-})
+}, { timestamps: true })
 
 const Automation = mongoose.model('Automation', automationSchema)
 module.exports = Automation

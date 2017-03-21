@@ -13,8 +13,8 @@ const Automation = require('../models/Automation')
 chai.use(chaiHttp)
 
 var userToken = ""
-var hubCode1 = "testHubCode1"
-var hubCode2 = "testHubCode2"
+var hubCode1 = "fakeHubCode"
+var hubCode2 = "testHubCode"
 var hubID1 = ""
 var hubID2 = ""
 var deviceID1 = ""
@@ -94,7 +94,7 @@ describe('Create/Login/Logout User', () => {
        .set('x-access-token', userToken)
        .send(req)
        .end((err, res) => {
-          res.should.have.status(200)
+          res.should.have.status(400)
           res.body.should.be.a('object')
           res.body.should.have.property('result').eql(1)
           res.body.should.have.property('error')
@@ -182,7 +182,7 @@ describe('Register/Add/GetAll/Delete Hub', () => {
   //Register 2 Hubs
   it('should register a new Hub with the server', (done) => {
     let req = {
-      address: "http://demo.openhab.org:8080/rest/",
+      address: "http://localhost:8080",
       hubCode: hubCode1
     }
     chai.request(server)
@@ -307,8 +307,11 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
 
   it('should register a new device with the server', (done) => {
     let req = {
-      deviceLink: "http://demo.openhab.org:8080/rest/items/Heating_GF_Toilet",
-      hubCode: hubCode1
+      deviceLink: "http://localhost:8080/devices/switch",
+      hubCode: hubCode1,
+      state: "OFF",
+      category: "heating",
+      type: "Switch"
     }
     chai.request(server)
      .post('/devices/register')
@@ -323,8 +326,11 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
   })
   it('should register a second new device with the server', (done) => {
     let req = {
-      deviceLink: "http://demo.openhab.org:8080/rest/items/Light_FF_Child_Ceiling",
-      hubCode: hubCode1
+      deviceLink: "http://localhost:8080/devices/dimmer",
+      hubCode: hubCode1,
+      state: "OFF",
+      category: "undefined",
+      type: "Dimmer"
     }
     chai.request(server)
      .post('/devices/register')
@@ -471,7 +477,7 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
     let req = {
       hubID: hubID1,
       deviceID: deviceID1,
-      deviceSettings: "OFF"
+      deviceSetting: "OFF"
     }
     chai.request(server)
       .post('/devices/update')
@@ -505,7 +511,7 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
     let req = {
       hubID: hubID1,
       deviceID: deviceID1,
-      deviceSettings: "ON"
+      deviceSetting: "ON"
     }
     chai.request(server)
       .post('/devices/update')
@@ -539,7 +545,7 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
     let req = {
       hubID: hubID1,
       deviceID: deviceID1,
-      deviceSettings: "OFF"
+      deviceSetting: "OFF"
     }
     chai.request(server)
       .post('/devices/update')
@@ -553,7 +559,23 @@ describe('Register/Find Nearby/Add/Update/GetAll/Delete Device', () => {
         done()
       })
   })
+
+  it('should get testDevice1, state should be OFF', (done) => {
+    chai.request(server)
+      .get('/devices/'+deviceID1._id)
+      .set('x-access-token', userToken)
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.a('object')
+        res.body.should.have.property('result').eql(0)
+        res.body.should.have.property('error').eql("")
+        res.body.should.have.property('device')
+        res.body.device.should.have.property('state').eql("OFF")
+        done()
+      })
+  })
 })
+
 
 describe('Add/GetAllGroups/Delete/AddDevice/GetGroup/RemoveDevice Group', () => {
   before((done) => {

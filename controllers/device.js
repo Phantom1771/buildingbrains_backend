@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const User = require('../models/User')
 const Hub = require('../models/Hub')
 const Device = require('../models/Device')
+const Update = require('../models/Update')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 const request = require('request')
@@ -20,7 +21,7 @@ exports.postAll = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -30,32 +31,23 @@ exports.postAll = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
         user = decoded._doc
 
         Device.find({ hub: req.body.hubID, registered: true}, (err, existingDevices) => {
+          if(err){
+            res.status(400).json({result:1, error: err })
+            return
+          }
           if (existingDevices){
-            for(var i=0; i < existingDevices.length; i++){
-              Device.findOne({ _id: existingDevices[i]._id}, (err, existingDevice) => {
-                request.get(existingDevice.link, function(err, response, body) {
-                  existingDevice.state = JSON.parse(body).state
-                  existingDevice.save((err) => {
-                    if (err) {
-                      res.json({result:1, error:err})
-                      return
-                    }
-                  })
-                })
-              })
-            }
             res.json({result: 0, error: "", devices: existingDevices})
             return
           }
           else{
-            res.json({result: 1, error: "Hub not found"})
+            res.status(400).json({result:1, error: "Hub not found"})
             return
           }
         })
@@ -63,7 +55,7 @@ exports.postAll = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -78,7 +70,7 @@ exports.getDevice = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -88,7 +80,7 @@ exports.getDevice = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -96,21 +88,11 @@ exports.getDevice = (req, res) => {
 
         Device.findOne({ _id: req.params.deviceID}, (err, existingDevice) => {
           if (existingDevice){
-            request.get(existingDevice.link, function(err, response, body) {
-              existingDevice.state = JSON.parse(body).state
-
-              existingDevice.save((err) => {
-                if (err) {
-                  res.json({result:1, error:err})
-                  return
-                }
-                res.json({result:0, error:"", device: existingDevice})
-                return
-              })
-            })
+            res.status(200).json({result:0, error:"", device: existingDevice})
+            return
           }
           else{
-            res.json({result: 1, error: "Device not found"})
+            res.status(400).json({result:1, error: "Device not found"})
             return
           }
         })
@@ -118,7 +100,7 @@ exports.getDevice = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -134,7 +116,7 @@ exports.postNearby = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -144,7 +126,7 @@ exports.postNearby = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -156,7 +138,7 @@ exports.postNearby = (req, res) => {
             return
           }
           else{
-            res.json({result: 1, error: "Hub not found"})
+            res.status(400).json({result:1, error: "Hub not found"})
             return
           }
         })
@@ -164,7 +146,7 @@ exports.postNearby = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -184,7 +166,7 @@ exports.postNearby = (req, res) => {
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors[0].msg})
+     res.status(400).json({result:1, error:errors[0].msg})
      return
    }
 
@@ -194,7 +176,7 @@ exports.postNearby = (req, res) => {
      // verifies secret and checks exp
      jwt.verify(token, process.env.SECRET, function(err, decoded) {
        if (err) {
-         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         res.status(400).json({result:1, error: 'Failed to authenticate token.' })
          return
        }
        else { // if everything is good
@@ -202,48 +184,14 @@ exports.postNearby = (req, res) => {
 
          Device.findOne({_id: req.body.deviceID, registered: false}, (err, existingDevice) => {
            if (err) {
-             res.json({result:1, error:error})
+             res.status(400).json({result:1, error:error})
              return
            }
 
            if (existingDevice){
-             //Update device info
-             request.get(existingDevice.link, function(err, response, body) {
-
-               existingDevice.state = JSON.parse(body).state
-               existingDevice.category = JSON.parse(body).category
-               existingDevice.type = JSON.parse(body).type
-
-               if(existingDevice.type == "Switch"){
-                 existingDevice.params = ["ON","OFF"]
-               }
-               else if(existingDevice.type == "Dimmer"){
-                 existingDevice.params = ["percent"]
-               }
-               else if(existingDevice.type == "Color"){
-                 existingDevice.params = ["float,float,float"]
-               }
-               else if(existingDevice.type == "Number"){
-                 existingDevice.params = ["float"]
-               }
-               else if(existingDevice.type == "Contact"){
-                 existingDevice.params = ["OPEN", "CLOSED"]
-               }
-               else{
-                 existingDevice.params = []
-               }
-
-               existingDevice.save((err) => {
-                 if (err) {
-                   res.json({result:1, error:err})
-                   return
-                 }
-               })
-             })
-            //Then add to hub
              Hub.findOne({ _id:req.body.hubID}, (err, existingHub) => {
                if (err) {
-                 res.json({result:1, error:error})
+                 res.status(400).json({result:1, error:error})
                  return
                }
 
@@ -260,17 +208,17 @@ exports.postNearby = (req, res) => {
 
                  existingHub.save()
 
-                 res.json({result:0, error:""})
+                 res.status(200).json({result:0, error:""})
                  return
                }
                else{
-                 res.json({result:1, error:"A hub matching this hubID could not be found."})
+                 res.status(400).json({result:1, error:"A hub matching this hubID could not be found."})
                  return
                }
              })
            }
            else{
-             res.json({result:1, error:"A device matching this deviceID could not be found or is already registered to a Hub."})
+             res.status(400).json({result:1, error:"A device matching this deviceID could not be found or is already registered to a Hub."})
              return
            }
          })
@@ -278,7 +226,7 @@ exports.postNearby = (req, res) => {
      })
    }
    else{ // if there is no token return an error
-     res.json({ result: 1, error: 'No token provided.' })
+     res.status(400).json({result:1, error: 'No token provided.' })
      return
    }
  }
@@ -287,18 +235,18 @@ exports.postNearby = (req, res) => {
  * POST devices/update
  * Updates the device status
  * Authentication: header: x-access-token
- * JSON req: {hubID: "xxx", deviceID: "xxx", deviceSettings: {settings}}
+ * JSON req: {hubID: "xxx", deviceID: "xxx", deviceSetting: {settings}}
  * JSON res: {result: 0/1, error: "xxx"}
  */
  exports.postUpdate = (req, res) => {
    req.assert('hubID', 'hubID is empty').notEmpty()
    req.assert('deviceID', 'deviceID is empty').notEmpty()
-   req.assert('deviceSettings', 'deviceSettings is empty').notEmpty()
+   req.assert('deviceSetting', 'deviceSetting is empty').notEmpty()
 
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors[0].msg})
+     res.status(400).json({result:1, error:errors[0].msg})
      return
    }
 
@@ -308,33 +256,41 @@ exports.postNearby = (req, res) => {
      // verifies secret and checks exp
      jwt.verify(token, process.env.SECRET, function(err, decoded) {
        if (err) {
-         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         res.status(400).json({result:1, error: 'Failed to authenticate token.' })
          return
        }
        else { // if everything is good
          user = decoded._doc
 
-         Device.findOne({ _id: req.body.deviceID, hub: req.body.hubID}, (err, existingDevice) => {
-           if (existingDevice){
-             request.post({url:existingDevice.link, body:req.body.deviceSettings}, function(err, response, body) {
-               if(response.statusCode !== 200){
-                 res.json({result: 1, error: "Bad request to the Hub"})
+         Hub.findOne({ _id: req.body.hubID}, (err, existingHub) => {
+           if(existingHub){
+           Device.findOne({ _id: req.body.deviceID, hub: req.body.hubID}, (err, existingDevice) => {
+             if (existingDevice){
+                 const update = new Update({
+                   hubCode: existingHub.hubCode,
+                   deviceLink: existingDevice.link,
+                   setting: req.body.deviceSetting
+                 })
+                 update.save()
+                 existingDevice.state = req.body.deviceSetting
+                 existingDevice.save((err, modified_device) => {
+                   if (err) {
+                     res.status(400).json({result:1, error: err})
+                     return
+                   }
+
+                   res.json({result: 0, error: "", device: modified_device})
+                   return
+                 })
+               }
+               else{
+                 res.status(400).json({result:1, error: "Device not found or isnt registered to this hub"})
                  return
                }
-               existingDevice.state = req.body.deviceSettings
-               existingDevice.save((err, modified_device) => {
-                 if (err) {
-                   res.json({result: 1, error: err})
-                   return
-                 }
-
-                 res.json({result: 0, error: "", devices: modified_device})
-                 return
-               })
              })
            }
            else{
-             res.json({result: 1, error: "Device not found or isnt registered to this hub"})
+             res.status(400).json({result:1, error: 'Hub not found'})
              return
            }
          })
@@ -342,7 +298,7 @@ exports.postNearby = (req, res) => {
      })
    }
    else{ // if there is no token return an error
-     res.json({ result: 1, error: 'No token provided.' })
+     res.status(400).json({result:1, error: 'No token provided.' })
      return
    }
  }
@@ -361,7 +317,7 @@ exports.postNearby = (req, res) => {
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors[0].msg})
+     res.status(400).json({result:1, error:errors[0].msg})
      return
    }
 
@@ -371,7 +327,7 @@ exports.postNearby = (req, res) => {
      // verifies secret and checks exp
      jwt.verify(token, process.env.SECRET, function(err, decoded) {
        if (err) {
-         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         res.status(400).json({result:1, error: 'Failed to authenticate token.' })
          return
        }
        else { // if everything is good
@@ -379,7 +335,7 @@ exports.postNearby = (req, res) => {
 
          Device.findOne({_id: req.body.deviceID}, (err, existingDevice) => {
            if (err) {
-             res.json({result:1, error:error})
+             res.status(400).json({result:1, error:error})
              return
            }
 
@@ -388,11 +344,11 @@ exports.postNearby = (req, res) => {
              existingDevice.name = null;
              existingDevice.save()
 
-             res.json({result:0, error: ""})
+             res.status(200).json({result:0, error: ""})
              return
            }
            else{
-             res.json({result:1, error:"A device matching this deviceID could not be found."})
+             res.status(400).json({result:1, error:"A device matching this deviceID could not be found."})
              return
            }
          })
@@ -400,7 +356,7 @@ exports.postNearby = (req, res) => {
      })
    }
    else{ // if there is no token return an error
-     res.json({ result: 1, error: 'No token provided.' })
+     res.status(400).json({result:1, error: 'No token provided.' })
      return
    }
  }
@@ -411,44 +367,79 @@ exports.postNearby = (req, res) => {
   * THIS CALL IS ONLY FOR THE HUB
   * Sends device information to backend,
   * deviceLink is the devices link relative to the hub
-  * JSON req: {deviceLink: "xxx", hubCode: "xxx"}
+  * JSON req: {deviceLink: "xxx", hubCode: "xxx", state: "xxx", category: "xxx", type: "xxx"}
   * JSON res: {result: 0/1, error: "xxx"}
   */
   exports.postRegister = (req, res) => {
     req.assert('deviceLink', 'deviceLink is empty').notEmpty()
     req.assert('hubCode', 'hubCode is empty').notEmpty()
+    req.assert('state', 'state is empty').notEmpty()
+    req.assert('type', 'type is empty').notEmpty()
 
     const errors = req.validationErrors()
 
     if (errors) {
-      res.json({result:1, error:errors[0].msg})
+      res.status(400).json({result:1, error:errors[0].msg})
       return
     }
 
     Hub.findOne({ hubCode:req.body.hubCode}, (err, existingHub) => {
       if (err) {
-        res.json({result:1, error:error})
+        res.status(400).json({result:1, error:err.errmsg})
         return
       }
 
       if (existingHub) {
-        const device = new Device({
-          link:req.body.deviceLink,
-          hub: existingHub._id,
-          registered: false
-        })
-
-        device.save((err) => {
-          if (err) {
-            res.json({result:1, error:err})
+        Device.findOne({link:req.body.deviceLink}, (err, existingDevice) => {
+          if(err){
+            res.status(400).json({result:1, error:err.errmsg})
             return
           }
-          res.json({result:0, error:""})
-          return
+          if(existingDevice){
+            res.status(208).json({result:0, error:'This Hub has already been registered'})
+            return
+          }
+          else{
+            const device = new Device({
+              link:req.body.deviceLink,
+              hub: existingHub._id,
+              state: req.body.state,
+              type: req.body.type,
+              registered: false
+            })
+
+            if(req.body.type == "Switch"){
+              device.params = ["ON","OFF"]
+            }
+            else if(req.body.type == "Dimmer"){
+              device.params = ["percent"]
+            }
+            else if(req.body.type == "Color"){
+              device.params = ["float,float,float"]
+            }
+            else if(req.body.type == "Number"){
+              device.params = ["float"]
+            }
+            else if(req.body.type == "Contact"){
+              device.params = ["OPEN", "CLOSED"]
+            }
+            else{
+              device.params = []
+            }
+
+            device.save((err) => {
+              if (err) {
+                res.status(400).json({result:1, error:err.errmsg})
+                return
+              }
+              res.status(200).json({result:0, error:""})
+              return
+            })
+          }
         })
       }
       else{
-        res.json({result:1, error:'Device already registered'})
+        res.status(400).json({result:1, error:'Device already registered'})
         return
       }
     })

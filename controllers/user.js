@@ -21,7 +21,7 @@ exports.postSignup = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -34,12 +34,12 @@ exports.postSignup = (req, res) => {
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) {
-      res.json({result:1, error:err})
+      res.status(400).json({result:1, error:err})
       return
     }
 
     if (existingUser) {
-      res.json({result:1, error:'Account with that email address already exists.'})
+      res.status(400).json({result:1, error:'Account with that email address already exists.'})
       return
     }
     user.save((err) => {
@@ -49,7 +49,7 @@ exports.postSignup = (req, res) => {
           expiresIn : 60*60*24 // expires in 24 hours
 
           })
-      res.json({result:0,error:"", userToken: token})
+      res.status(200).json({result:0,error:"", userToken: token})
       return
     })
   })
@@ -68,13 +68,13 @@ exports.postLogin = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) {
-      res.json({result:1, error:err})
+      res.status(400).json({result:1, error:err})
       return
     }
     if (existingUser) {
@@ -85,15 +85,15 @@ exports.postLogin = (req, res) => {
           expiresIn : 60*60*24 // expires in 24 hours
 
           })
-          res.json({result:0, error:"", userToken: token})
+          res.status(200).json({result:0, error:"", userToken: token})
           return
         }
-          res.json({result:1, error:"Password incorrect!"})
+          res.status(400).json({result:1, error:"Password incorrect!"})
           return
     })
     }
     else {
-      res.json({result:1, error:"User not found!"})
+      res.status(400).json({result:1, error:"User not found!"})
       return
     }
   })
@@ -114,7 +114,7 @@ exports.postLogout = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good, save to request for use in other routes
@@ -125,7 +125,7 @@ exports.postLogout = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -142,13 +142,13 @@ exports.postForgot = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) {
-      res.json({result:1, error:err})
+      res.status(400).json({result:1, error:err})
       return
     }
     if (existingUser) {
@@ -173,11 +173,11 @@ exports.postForgot = (req, res) => {
           console.log(response.body)
           console.log(response.headers)
       })
-      res.json({result:0, error:"Email is sent!"})
+      res.status(200).json({result:0, error:"Email is sent!"})
       return
     }
     else {
-      res.json({result:1, error:"User not found!"})
+      res.status(400).json({result:1, error:"User not found!"})
       return
     }
   })
@@ -198,7 +198,7 @@ exports.postReset = (req, res, next) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -208,13 +208,13 @@ exports.postReset = (req, res, next) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good, save to request for use in other routes
         User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { password: newPassword }}, { multi: false }, (err, existingUser) => {
           if (err) {
-            res.json({result:1, error:error, userToken: ""})
+            res.status(400).json({result:1, error:error, userToken: ""})
             return
           }
           else{
@@ -229,7 +229,7 @@ exports.postReset = (req, res, next) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -247,13 +247,13 @@ exports.getAccount = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else {
         User.findOne({ email: decoded._doc.email }, (err, existingUser) => {
           if (err) {
-            res.json({result:1, error:err})
+            res.status(400).json({result:1, error:err})
             return
           }
           if (existingUser) {
@@ -261,7 +261,7 @@ exports.getAccount = (req, res) => {
             return
           }
           else {
-            res.json({result:1, error:"User not found!"})
+            res.status(400).json({result:1, error:"User not found!"})
             return
           }
         })
@@ -269,7 +269,7 @@ exports.getAccount = (req, res) => {
     })
   }
   else{
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -289,20 +289,20 @@ exports.postUpdateProfile = (req, res, next) => {
   if(token){
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.'})
+        res.status(400).json({result:1, error: 'Failed to authenticate token.'})
         return
       }
       else{
         User.findOneAndUpdate({ email: decoded._doc.email }, { $set: { firstname: req.body.firstName, lastname:req.body.lastName  }}, { multi: true }, (err, existingUser) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
           else{
             var newToken = jwt.sign(existingUser, process.env.SECRET, {
               expiresIn : 60*60*24 // expires in 24 hours
             })
-            res.json({result:0, error:"", userToken:newToken})
+            res.status(200).json({result:0, error:"", userToken:newToken})
             return
           }
         })
@@ -310,7 +310,7 @@ exports.postUpdateProfile = (req, res, next) => {
     })
   }
   else{
-    res.json({ result: 1, error: 'No token provided.'})
+    res.status(400).json({result:1, error: 'No token provided.'})
     return
   }
 }
@@ -328,7 +328,7 @@ exports.postUpdatePassword = (req, res, next) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -341,13 +341,13 @@ exports.postUpdatePassword = (req, res, next) => {
   if(token){
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.', passwordResetToken: ""})
+        res.status(400).json({result:1, error: 'Failed to authenticate token.', passwordResetToken: ""})
         return
       }
       else{
         User.findOne({ email: decoded._doc.email }, (err, existingUser) => {
           if (err) {
-            res.json({result:1, error:error, userToken: ""})
+            res.status(400).json({result:1, error:error, userToken: ""})
             return
           }
           if(existingUser){
@@ -359,10 +359,10 @@ exports.postUpdatePassword = (req, res, next) => {
                 })
                 existingUser.password = req.body.newPassword
                 existingUser.save()
-                res.json({result:0, error:"", userToken: token})
+                res.status(200).json({result:0, error:"", userToken: token})
                 return
               }
-                res.json({result:1, error:"Password incorrect!"})
+                res.status(400).json({result:1, error:"Password incorrect!"})
                 return
           })
           }
@@ -371,7 +371,7 @@ exports.postUpdatePassword = (req, res, next) => {
     })
   }
   else{
-    res.json({ result: 1, error: 'No token provided.', passwordResetToken: ""})
+    res.status(400).json({result:1, error: 'No token provided.', passwordResetToken: ""})
     return
   }
 }
@@ -389,13 +389,13 @@ exports.postDeleteAccount = (req, res, next) => {
   if(token){
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.'})
+        res.status(400).json({result:1, error: 'Failed to authenticate token.'})
         return
       }
       else{
         User.remove({ email: decoded._doc.email }, function (err) {
           if(err)  {
-            res.json({ result: 1, error:err})
+            res.status(400).json({result:1, error:err})
             return
           }
           else {
@@ -407,7 +407,7 @@ exports.postDeleteAccount = (req, res, next) => {
     })
   }
   else{
-    res.json({ result: 1, error: 'No token provided.'})
+    res.status(400).json({result:1, error: 'No token provided.'})
     return
   }
 }

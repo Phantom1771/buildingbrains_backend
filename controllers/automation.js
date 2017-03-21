@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const User = require('../models/User')
 const Hub = require('../models/Hub')
 const Device = require('../models/Device')
+const Update = require('../models/Update')
 const Automation = require('../models/Automation')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
@@ -22,7 +23,7 @@ exports.postAdd = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -32,7 +33,7 @@ exports.postAdd = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -40,7 +41,7 @@ exports.postAdd = (req, res) => {
 
         Hub.findOne({_id: req.body.hubID}, (err, existingHub) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
           if (existingHub){
@@ -55,15 +56,15 @@ exports.postAdd = (req, res) => {
 
             automation.save((err) => {
               if (err) {
-                res.json({result:1, error:err})
+                res.status(400).json({result:1, error:err})
                 return
               }
-              res.json({result:0, error:""})
+              res.status(200).json({result:0, error:""})
               return
             })
           }
           else{
-            res.json({result:1, error:"A hub matching this hubID could not be found"})
+            res.status(400).json({result:1, error:"A hub matching this hubID could not be found"})
             return
           }
         })
@@ -71,7 +72,7 @@ exports.postAdd = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -89,7 +90,7 @@ exports.postAll = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -99,7 +100,7 @@ exports.postAll = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -107,16 +108,16 @@ exports.postAll = (req, res) => {
 
         Automation.find({ hub: req.body.hubID}, (err, existingAutomations) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
 
           if (existingAutomations){
-            res.json({result: 0, error: "", automations: existingAutomations})
+            res.status(200).json({result:0, error: "", automations: existingAutomations})
             return
           }
           else{
-            res.json({result: 1, error: "Hub not found"})
+            res.status(400).json({result:1, error: "Hub not found"})
             return
           }
         })
@@ -124,7 +125,7 @@ exports.postAll = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -145,7 +146,7 @@ exports.postAddDevice = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -155,7 +156,7 @@ exports.postAddDevice = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -163,14 +164,14 @@ exports.postAddDevice = (req, res) => {
 
         Automation.findOne({_id: req.body.automationID, hub: req.body.hubID}, (err, existingAutomation) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
 
           if (existingAutomation){
             Device.findOne({ _id:req.body.deviceID, hub: req.body.hubID}, (err, existingDevice) => {
               if (err) {
-                res.json({result:1, error:error})
+                res.status(400).json({result:1, error:error})
                 return
               }
               if(existingDevice){
@@ -179,21 +180,21 @@ exports.postAddDevice = (req, res) => {
 
                 existingAutomation.save((err) => {
                   if (err) {
-                    res.json({result:1, error:err})
+                    res.status(400).json({result:1, error:err})
                     return
                   }
-                  res.json({result:0, error:""})
+                  res.status(200).json({result:0, error:""})
                   return
                 })
               }
               else{
-                res.json({result:1, error:"A device matching this deviceID could not be found on this hub."})
+                res.status(400).json({result:1, error:"A device matching this deviceID could not be found on this hub."})
                 return
               }
             })
           }
           else{
-            res.json({result:1, error:"An automation matching this automationID could not be found on this Hub."})
+            res.status(400).json({result:1, error:"An automation matching this automationID could not be found on this Hub."})
             return
           }
         })
@@ -201,7 +202,7 @@ exports.postAddDevice = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -216,7 +217,7 @@ exports.postAddDevice = (req, res) => {
    const errors = req.validationErrors()
 
    if (errors) {
-     res.json({result:1, error:errors[0].msg})
+     res.status(400).json({result:1, error:errors[0].msg})
      return
    }
 
@@ -226,7 +227,7 @@ exports.postAddDevice = (req, res) => {
      // verifies secret and checks exp
      jwt.verify(token, process.env.SECRET, function(err, decoded) {
        if (err) {
-         res.json({ result: 1, error: 'Failed to authenticate token.' })
+         res.status(400).json({result:1, error: 'Failed to authenticate token.' })
          return
        }
        else { // if everything is good
@@ -234,10 +235,10 @@ exports.postAddDevice = (req, res) => {
 
          Automation.findOne({ _id: req.params.automationID}, (err, existingAutomation) => {
            if (existingAutomation){
-               res.json({result: 0, error: "", devices: existingAutomation.automations})
+               res.status(200).json({result:0, error: "", devices: existingAutomation.automations})
            }
            else{
-             res.json({result: 1, error: "Automation not found"})
+             res.status(400).json({result:1, error: "Automation not found"})
              return
            }
          })
@@ -245,7 +246,7 @@ exports.postAddDevice = (req, res) => {
      })
    }
    else{ // if there is no token return an error
-     res.json({ result: 1, error: 'No token provided.' })
+     res.status(400).json({result:1, error: 'No token provided.' })
      return
    }
  }
@@ -264,7 +265,7 @@ exports.postSendCommands = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -274,7 +275,7 @@ exports.postSendCommands = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -282,40 +283,58 @@ exports.postSendCommands = (req, res) => {
 
         Automation.findOne({ _id: req.body.automationID, hub: req.body.hubID}, function(err, existingAutomation){
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:err})
             return
           }
 
           if (existingAutomation){
-            for(var i=0; i < existingAutomation.automations.length; i++){
-              var setting = existingAutomation.automations[i].setting
-              Device.findOne({ _id: existingAutomation.automations[i].device, hub: req.body.hubID}, (err, existingDevice) => {
-                if (existingDevice){
-                  request.post({url:existingDevice.link, body:setting}, function(err, response, body) {
-                    if(response.statusCode !== 200){
-                      res.json({result: 1, error: "Bad request to the Hub"})
+            Hub.findOne({ _id: req.body.hubID}, function(err, existingHub){
+              if (err) {
+                res.status(400).json({result:1, error:err})
+                return
+              }
+
+              if(existingHub){
+                async.each(existingAutomation.automations, function(automation, callback){
+                  var setting = automation.setting
+                  var hub = existingHub
+                  Device.findOne({ _id: automation.device, hub: req.body.hubID}, function(err, existingDevice){
+                    if (err) {
+                      res.status(400).json({result:1, error:err})
                       return
                     }
-                    existingDevice.state = setting
-                    existingDevice.save()
+
+                    if(existingDevice){
+                      const update = new Update({
+                        hubCode:hub.hubCode,
+                        deviceLink: existingDevice.link,
+                        setting: setting
+                      })
+                      update.save()
+
+                      existingDevice.state = setting
+                      existingDevice.save()
+                      callback()
+                    }
                   })
-                }
-                else{
-                  res.json({result: 1, error: "Device not found or isnt registered to this hub"})
-                  return
-                }
-              })
-            }
-            res.json({result: 0, error: ""})
-            return
+
+
+                }, function(err){
+                  if(err){
+                    res.status(400).json({result:1, error:err})
+                    return
+                  }
+                  else{
+                    res.status(200).json({result:0, error: ""})
+                    return
+                  }
+                })
+              }
+            })
           }
         })
       }
     })
-  }
-  else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
-    return
   }
 }
 
@@ -335,7 +354,7 @@ exports.postRemoveDevice = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -345,7 +364,7 @@ exports.postRemoveDevice = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -353,7 +372,7 @@ exports.postRemoveDevice = (req, res) => {
 
         Automation.findOne({_id: req.body.automationID, hub: req.body.hubID}, (err, existingAutomation) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
 
@@ -361,11 +380,11 @@ exports.postRemoveDevice = (req, res) => {
             existingAutomation.automations.pull(req.body.autoID)
             existingAutomation.save()
 
-            res.json({result:0, error: ""})
+            res.status(200).json({result:0, error: ""})
             return
           }
           else{
-            res.json({result:1, error:"An Automation matching this automationID could not be found."})
+            res.status(400).json({result:1, error:"An Automation matching this automationID could not be found."})
             return
           }
         })
@@ -373,7 +392,7 @@ exports.postRemoveDevice = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
@@ -392,7 +411,7 @@ exports.postDelete = (req, res) => {
   const errors = req.validationErrors()
 
   if (errors) {
-    res.json({result:1, error:errors[0].msg})
+    res.status(400).json({result:1, error:errors[0].msg})
     return
   }
 
@@ -402,7 +421,7 @@ exports.postDelete = (req, res) => {
     // verifies secret and checks exp
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
       if (err) {
-        res.json({ result: 1, error: 'Failed to authenticate token.' })
+        res.status(400).json({result:1, error: 'Failed to authenticate token.' })
         return
       }
       else { // if everything is good
@@ -410,7 +429,7 @@ exports.postDelete = (req, res) => {
 
         Hub.findOne({_id: req.body.hubID, automations: req.body.automationID}, (err, existingHub) => {
           if (err) {
-            res.json({result:1, error:error})
+            res.status(400).json({result:1, error:error})
             return
           }
 
@@ -422,17 +441,17 @@ exports.postDelete = (req, res) => {
             //Remove Group from server
             Automation.remove({_id: req.body.automationID}, function(err) {
               if(err){
-                res.json({result:1, error: err})
+                res.status(400).json({result:1, error: err})
                 return
               }
               else{
-                res.json({result:0, error:""})
+                res.status(200).json({result:0, error:""})
                 return
               }
             })
           }
           else{
-            res.json({result:1, error:"A hub matching this hubID with an automation matching automationID could not be found."})
+            res.status(400).json({result:1, error:"A hub matching this hubID with an automation matching automationID could not be found."})
             return
           }
         })
@@ -440,7 +459,7 @@ exports.postDelete = (req, res) => {
     })
   }
   else{ // if there is no token return an error
-    res.json({ result: 1, error: 'No token provided.' })
+    res.status(400).json({result:1, error: 'No token provided.' })
     return
   }
 }
