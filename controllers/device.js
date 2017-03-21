@@ -373,7 +373,6 @@ exports.postNearby = (req, res) => {
     req.assert('deviceLink', 'deviceLink is empty').notEmpty()
     req.assert('hubCode', 'hubCode is empty').notEmpty()
     req.assert('state', 'state is empty').notEmpty()
-    req.assert('category', 'category is empty').notEmpty()
     req.assert('type', 'type is empty').notEmpty()
 
     const errors = req.validationErrors()
@@ -390,41 +389,52 @@ exports.postNearby = (req, res) => {
       }
 
       if (existingHub) {
-        const device = new Device({
-          link:req.body.deviceLink,
-          hub: existingHub._id,
-          state: req.body.state,
-          category: req.body.category,
-          type: req.body.type,
-          registered: false
-        })
-
-        if(req.body.type == "Switch"){
-          device.params = ["ON","OFF"]
-        }
-        else if(req.body.type == "Dimmer"){
-          device.params = ["percent"]
-        }
-        else if(req.body.type == "Color"){
-          device.params = ["float,float,float"]
-        }
-        else if(req.body.type == "Number"){
-          device.params = ["float"]
-        }
-        else if(req.body.type == "Contact"){
-          device.params = ["OPEN", "CLOSED"]
-        }
-        else{
-          device.params = []
-        }
-
-        device.save((err) => {
-          if (err) {
+        Device.findOne({link:req.body.deviceLink}, (err, existingDevice) => {
+          if(err){
             res.status(400).json({result:1, error:err.errmsg})
             return
           }
-          res.status(200).json({result:0, error:""})
-          return
+          if(existingDevice){
+            res.status(208).json({result:0, error:'This Hub has already been registered'})
+            return
+          }
+          else{
+            const device = new Device({
+              link:req.body.deviceLink,
+              hub: existingHub._id,
+              state: req.body.state,
+              type: req.body.type,
+              registered: false
+            })
+
+            if(req.body.type == "Switch"){
+              device.params = ["ON","OFF"]
+            }
+            else if(req.body.type == "Dimmer"){
+              device.params = ["percent"]
+            }
+            else if(req.body.type == "Color"){
+              device.params = ["float,float,float"]
+            }
+            else if(req.body.type == "Number"){
+              device.params = ["float"]
+            }
+            else if(req.body.type == "Contact"){
+              device.params = ["OPEN", "CLOSED"]
+            }
+            else{
+              device.params = []
+            }
+
+            device.save((err) => {
+              if (err) {
+                res.status(400).json({result:1, error:err.errmsg})
+                return
+              }
+              res.status(200).json({result:0, error:""})
+              return
+            })
+          }
         })
       }
       else{

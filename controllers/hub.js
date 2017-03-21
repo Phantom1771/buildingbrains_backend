@@ -235,7 +235,7 @@ exports.postRegister = (req, res) => {
     }
 
     if (existingHub) {
-      res.status(400).json({result:1, error:'This Hub has already been registered'})
+      res.status(208).json({result:0, error:'This Hub has already been registered'})
       return
     }
 
@@ -272,7 +272,7 @@ exports.postCheckUpdates = (req, res) => {
     if(existingHub){
       Update.find({ hubCode: req.body.hubCode}, (err, existingUpdates) => {
         if (err) {
-          res.status(400).json({result:1, error:error})
+          res.status(400).json({result:1, error:err})
           return
         }
 
@@ -285,16 +285,7 @@ exports.postCheckUpdates = (req, res) => {
           })
           return
         }
-
-        else{
-          res.status(400).json({result:1, error: "No current updates to return"})
-          return
-        }
       })
-    }
-    else{
-      res.status(400).json({result:1, error:"No hub with that HubCode Registered"})
-      return
     }
   })
 }
