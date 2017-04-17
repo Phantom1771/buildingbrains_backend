@@ -415,7 +415,7 @@ exports.postNearby = (req, res) => {
               device.params = ["percent"]
             }
             else if(req.body.type == "Color"){
-              device.params = ["float,float,float"]
+              device.params = ["percent"]
             }
             else if(req.body.type == "Number"){
               device.params = ["float"]
