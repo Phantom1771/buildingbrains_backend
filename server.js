@@ -1,125 +1,75 @@
-/**
- * Module dependencies.
- */
 const express = require('express')
-const compression = require('compression')
+const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
-const promise = require('bluebird')
-const logger = require('morgan')
-const chalk = require('chalk')
-const errorHandler = require('errorhandler')
-const dotenv = require('dotenv')
-const flash = require('express-flash')
-const path = require('path')
-const mongoose = promise.promisifyAll(require('mongoose'))
-const expressValidator = require('express-validator')
-const expressStatusMonitor = require('express-status-monitor')
-const assert = require('assert')
-const cors = require('cors')
+const passport = require('passport')
+const ejs = require('ejs')
+const session = require('express-session')
 
-/**
- * Load environment variables from .env file, where API keys and passwords are configured.
- */
-dotenv.load({ path: '.env.example' })
-
-/**
- * Controllers (route handlers).
- */
+// Controllers
+const authController = require('./controllers/auth')
+const clientController = require('./controllers/client')
+const oauth2Controller = require('./controllers/oauth2')
 const userController = require('./controllers/user')
 const hubController = require('./controllers/hub')
-const deviceController = require('./controllers/device')
-const groupController = require('./controllers/group')
-const automationController = require('./controllers/automation')
 
-/**
- * Create Express server.
- */
-const server = express()
 
-/**
- * Connect to MongoDB.
- */
+// Connect to the buildingbrainsV2 MongoDB
+mongoose.connect('mongodb://localhost:27017/BuildingBrainsV2')
 
-mongoose.Promise = global.Promise
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI)
-mongoose.connection.on('error', () => {
-  console.log('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'))
-  process.exit()
-})
+// Create our Express application
+const app = express()
 
-server.set('superSecret', process.env.SECRET)
+// Set view engine to ejs
+app.set('view engine', 'ejs')
 
-/**
- * Express configuration.
- */
-server.set('port', process.env.PORT || 3000)
-server.use(expressStatusMonitor())
-server.use(compression())
+// Use the body-parser package in our application
+app.use(bodyParser.urlencoded({
+  extended: true
+}))
 
-server.use(logger('dev'))
-server.use(bodyParser.json())
-server.use(bodyParser.urlencoded({ extended: true }))
-server.use(expressValidator())
-server.use(cors())
+// Use express session support since OAuth2orize requires it
+app.use(session({
+  secret: 'Super Secret Session Key',
+  saveUninitialized: true,
+  resave: true
+}));
 
-/**
- * Primary server routes.
- */
-//User
-server.post('/users/signup/', userController.postSignup)
-server.post('/users/login/', userController.postLogin)
-server.post('/users/logout/', userController.postLogout)
-server.post('/users/forgot/', userController.postForgot)
-server.post('/users/reset/', userController.postReset)
-server.get('/users/account/', userController.getAccount)
-server.post('/users/account/profile/', userController.postUpdateProfile)
-server.post('/users/account/password', userController.postUpdatePassword)
-server.post('/users/account/delete/', userController.postDeleteAccount)
+// Use environment defined port or 3000
+const port = process.env.PORT || 3000
 
-//Hub
-server.post('/hubs/register', hubController.postRegister)
-server.post('/hubs/add', hubController.postAdd)
-server.post('/hubs/delete', hubController.postDelete)
-server.get('/hubs/', hubController.getAll)
-server.post('/hubs/checkUpdates', hubController.postCheckUpdates)
+// Create our Express router
+const router = express.Router()
 
-//Device
-server.post('/devices/register', deviceController.postRegister)
-server.post('/devices/nearby', deviceController.postNearby)
-server.post('/devices/add', deviceController.postAdd)
-server.post('/devices/', deviceController.postAll)
-server.get('/devices/:deviceID', deviceController.getDevice)
-server.post('/devices/update', deviceController.postUpdate)
-server.post('/devices/delete', deviceController.postDelete)
+// All Server Routes
+// Client Routes
+router.route('/clients')
+  .post(authController.isAuthenticated, clientController.postClients)
+  .get(authController.isAuthenticated, clientController.getClients)
 
-//Group
-server.post('/groups/add', groupController.postAdd)
-server.post('/groups/', groupController.postAll)
-server.post('/groups/addDevice', groupController.postAddDevice)
-server.get('/groups/:groupID', groupController.getGroup)
-server.post('/groups/removeDevice', groupController.postRemoveDevice)
-server.post('/groups/delete', groupController.postDelete)
+// Oauth2 Routes
+router.route('/oauth2/authorize')
+  .get(authController.isAuthenticated, oauth2Controller.authorization)
+  .post(authController.isAuthenticated, oauth2Controller.decision)
+router.route('/oauth2/token')
+  .post(authController.isClientAuthenticated, oauth2Controller.token)
 
-//Automation
-server.post('/automations/add', automationController.postAdd)
-server.post('/automations/', automationController.postAll)
-server.post('/automations/addDevice', automationController.postAddDevice)
-server.get('/automations/:automationID', automationController.getAutomation)
-server.post('/automations/send', automationController.postSendCommands)
-server.post('/automations/removeDevice', automationController.postRemoveDevice)
-server.post('/automations/delete', automationController.postDelete)
+// User Routes
+router.route('/users')
+  .post(userController.postUsers)
+  .get(authController.isAuthenticated, userController.getUsers)
 
-/**
- * Error Handler.
- */
-server.use(errorHandler())
+// Hub Routes
+router.route('/hubs')
+  .post(authController.isAuthenticated, hubController.postHubs)
+  .get(authController.isAuthenticated, hubController.getHubs)
+router.route('/hubs/:hubID')
+  .get(authController.isAuthenticated, hubController.getHub)
+  .put(authController.isAuthenticated, hubController.putHub)
+  .delete(authController.isAuthenticated, hubController.deleteHub)
 
-/**
- * Start Express server.
- */
-server.listen(server.get('port'), () => {
-  console.log('%s Server is running at http://localhost:%d in %s mode', chalk.green('✓'), server.get('port'), server.get('env')) 
-  console.log('  Press CTRL-C to stop\n')
-})
+// Register all our routes with /api
+app.use('/api', router)
 
-module.exports = server
+// Start the server
+app.listen(port)
+console.log('Server started on port: ' + port)

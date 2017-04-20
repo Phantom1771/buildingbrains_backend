@@ -1,49 +1,37 @@
-const bcrypt = require('bcrypt-nodejs')
-const crypto = require('crypto')
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt-nodejs')
 
-const userSchema = new mongoose.Schema({
+const UserSchema = mongoose.Schema({
+  email: {type: String, unique: true, required: true},
+  password: {type: String, required: true},
   firstName: String,
   lastName: String,
-  email: { type: String, unique: true },
-  password: String,
-  firstname: String,
-  lastname: String,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
+  hub: String 
+})
 
+UserSchema.pre('save', function(callback){
+  var user = this;
 
-  hubs: [{type: mongoose.Schema.Types.ObjectId, ref: 'Hub'}],
+  // Break out if the password hasn't changed
+  if (!user.isModified('password')) return callback()
 
-  facebook: String
+  // Password changed so we need to hash it
+  bcrypt.genSalt(5, function(err, salt) {
+    if (err) return callback(err)
 
-}, { timestamps: true })
-
-
-/**
- * Password hash middleware.
- */
-userSchema.pre('save', function save(next) {
-  const user = this
-  if (!user.isModified('password')) { return next() }
-  bcrypt.genSalt(10, (err, salt) => {
-    if (err) { return next(err) }
-    bcrypt.hash(user.password, salt, null, (err, hash) => {
-      if (err) { return next(err) }
+    bcrypt.hash(user.password, salt, null, function(err, hash) {
+      if (err) return callback(err)
       user.password = hash
-      next()
+      callback()
     })
   })
 })
 
-/**
- * Helper method for validating user's password.
- */
-userSchema.methods.comparePassword = function comparePassword(candidatePassword, cb) {
-  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
-    cb(err, isMatch)
+UserSchema.methods.verifyPassword = function(password, cb){
+  bcrypt.compare(password, this.password, function(err, isMatch){
+    if(err) return cb(err)
+    cb(null, isMatch)
   })
 }
 
-const User = mongoose.model('User', userSchema)
-module.exports = User
+module.exports = mongoose.model('User', UserSchema)
