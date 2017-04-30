@@ -1,80 +1,148 @@
+const User = require('../models/user')
 const Hub = require('../models/hub')
 
-// Create endpoint for POST /api/hubs
-exports.postHubs = function(req,res){
-  var hub = new Hub()
+/*
+ * POST /api/hubs/
+ * Create a new hub (only called by hub)
+ * JSON Req: {hubCode: String}
+ * 200 Res: {message: String, object: Hub}
+ * 400 Res: {message: String}
+ */
+exports.postHub = function(req,res){
+  req.assert('hubCode', 'hubCode is empty').notEmpty()
+  const errors = req.validationErrors()
+  if (errors) {
+    res.status(400).json({message:errors[0].msg})
+    return
+  }
 
-  hub.hubCode = req.body.hubCode
-  hub.hubName = req.body.hubName
-  hub.userID = req.user._id
-
+  var hub = new Hub({
+    hubCode: req.body.hubCode
+  })
   hub.save(function(err) {
     if (err){
-      res.send(err)
+      res.status(400).json({message: 'Hub already registered'})
       return
     }
-
-    res.json({ message: 'Hub added!', data: hub })
+    res.status(200).json({ message: 'Hub added!', object: hub })
     return
   })
 }
 
-// Create endpoint for GET /api/hubs
+/*
+ * GET /api/hubs/
+ * Retrieve list of users hubs
+ * 200 Res: {message: String, objects: Hubs}
+ * 400 Res: {message: String}
+ */
 exports.getHubs = function(req,res){
   Hub.find({userID: req.user._id},function(err, hubs) {
     if (err){
-      res.send(err)
+      res.status(400).json({message: err})
       return
     }
-
-    res.json(hubs)
+    res.status(200).json({message: 'Hubs retrieved', objects: hubs})
     return
   })
 }
 
-// Create endpoint for GET /api/hubs/:hubID
+/*
+ * PUT /api/hubs/
+ * Associates a hub with a user
+ * JSON Req: {hubCode: String, hubName: String}
+ * 200 Res: {message: String, object: Hub}
+ * 400 Res: {message: String}
+ */
+exports.putHub = function(req,res){
+  req.assert('hubCode', 'hubCode is empty').notEmpty()
+  req.assert('hubName', 'Name is empty').notEmpty()
+  const errors = req.validationErrors()
+  if (errors) {
+    res.status(400).json({result:1, error:errors[0].msg})
+    return
+  }
+
+  Hub.findOne({ hubCode:req.body.hubCode}, (err, existingHub) => {
+    if (err) {
+      res.status(400).json({result:1, error:error})
+      return
+    }
+    if (existingHub) {
+      User.findOne({ _id:req.user._id}, (err, existingUser) => {
+        if (err) {
+          res.status(400).json({result:1, error:error})
+          return
+        }
+        if (existingUser) {
+          if (existingHub.name == null) {
+            existingHub.name = req.body.hubName
+            existingHub.save()
+          }
+          //This gets rid of ducplicates
+          existingUser.hubs.pull(existingHub)
+          existingHub.users.pull(existingUser)
+          existingUser.hubs.push(existingHub)
+          existingHub.users.push(existingUser)
+          existingUser.save()
+          existingHub.save()
+
+          res.status(200).json({message: 'Hub added to User', hub: existingHub})
+          return
+        }
+      })
+    }
+  })
+}
+
+/*
+ * GET /api/hubs/:hubID
+ * Retrieve hub info
+ * 200 Res: {message: String, object: Hub}
+ * 400 Res: {message: String}
+ */
 exports.getHub = function(req,res){
   Hub.find({userID: req.user._id, _id:req.params.hubID}, function(err, hub) {
     if (err){
-      res.send(err)
+      res.status(400).json({message: err})
       return
     }
-
-    res.json(hub)
+    res.status(200).json({message:'Hub retrieved', object: hub})
     return
   })
 }
 
-// Create endpoint for PUT /api/hubs/:hubID
-exports.putHub = function(req,res){
-  Hub.update({userID: req.user._id, _id:req.params.hubID},{hubName: req.body.hubName},function(err, name, raw) {
-    if (err){
-      res.send(err)
+/*
+ * DELETE /api/hubs/:hubID
+ * Deletes a hub from a user
+ * JSON Req: {}
+ * 200 Res: {message: String}
+ * 400 Res: {message: String}
+ */
+exports.deleteHub = function(req,res){
+  Hub.findOne({ _id:req.params.hubID}, (err, existingHub) => {
+    if (err) {
+      res.status(400).json({result:1, error:error})
       return
     }
 
-    // Save the hub and check for errors
-    hub.save(function(err) {
-      if (err){
-        res.send(err)
-        return
-      }
+    if (existingHub) {
+      User.findOne({ _id:req.user._id}, (err, existingUser) => {
+        if (err) {
+          res.status(400).json({message:error})
+          return
+        }
 
-      res.json({message: 'hubName updated to '+ name})
-      return
-    })
+        if (existingUser) {
+          existingUser.hubs.pull(existingHub)
+          existingHub.users.pull(existingUser)
+
+          existingUser.save()
+          existingHub.save()
+
+          res.status(200).json({message:'Hub Deleted'})
+          return
+        }
+      })
+    }
   })
-}
-
-// Create endpoint for DELETE /api/hubs/:hubID
-exports.deleteHub = function(req,res){
-  Hub.remove({userID: req.user._id, _id:req.params.hubID}, function(err) {
-   if (err){
-     res.send(err)
-     return
-   }
-
-   res.json({ message: 'Hub removed!' })
-   return
- })
 }

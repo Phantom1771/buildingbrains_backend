@@ -1,9 +1,15 @@
 const express = require('express')
+const session = require('express-session')
+const expressValidator = require('express-validator')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
+const logger = require('morgan')
 const passport = require('passport')
 const ejs = require('ejs')
-const session = require('express-session')
+const chalk = require('chalk')
+const dotenv = require('dotenv')
+
+dotenv.load({ path: '.env' })
 
 // Controllers
 const authController = require('./controllers/auth')
@@ -11,6 +17,7 @@ const clientController = require('./controllers/client')
 const oauth2Controller = require('./controllers/oauth2')
 const userController = require('./controllers/user')
 const hubController = require('./controllers/hub')
+const deviceController = require('./controllers/device')
 
 
 // Connect to the buildingbrainsV2 MongoDB
@@ -21,26 +28,23 @@ const app = express()
 
 // Set view engine to ejs
 app.set('view engine', 'ejs')
-
-// Use the body-parser package in our application
-app.use(bodyParser.urlencoded({
-  extended: true
-}))
-
-// Use express session support since OAuth2orize requires it
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(logger('dev'))
 app.use(session({
   secret: 'Super Secret Session Key',
   saveUninitialized: true,
   resave: true
 }));
+app.use(expressValidator())
 
-// Use environment defined port or 3000
 const port = process.env.PORT || 3000
-
-// Create our Express router
 const router = express.Router()
 
-// All Server Routes
+/*
+ * All Server Routes
+ */
+
 // Client Routes
 router.route('/clients')
   .post(authController.isAuthenticated, clientController.postClients)
@@ -57,19 +61,42 @@ router.route('/oauth2/token')
 router.route('/users')
   .post(userController.postUsers)
   .get(authController.isAuthenticated, userController.getUsers)
+router.route('/users/account')
+  .get(authController.isAuthenticated, userController.getUser)
+  .put(authController.isAuthenticated, userController.putUser)
+  .delete(authController.isAuthenticated, userController.deleteUser)
+router.route('/users/account/forgot')
+  .put(userController.putForgot)
 
 // Hub Routes
 router.route('/hubs')
-  .post(authController.isAuthenticated, hubController.postHubs)
+  .post(hubController.postHub)
   .get(authController.isAuthenticated, hubController.getHubs)
+  .put(authController.isAuthenticated, hubController.putHub)
 router.route('/hubs/:hubID')
   .get(authController.isAuthenticated, hubController.getHub)
-  .put(authController.isAuthenticated, hubController.putHub)
   .delete(authController.isAuthenticated, hubController.deleteHub)
 
-// Register all our routes with /api
+// Device Routes
+router.route('/devices')
+  .post(deviceController.postDevice)
+  .put(authController.isAuthenticated, deviceController.putDevices)
+router.route('/devices/unclaimed/:hubID')
+  .get(authController.isAuthenticated, deviceController.getUnclaimedDevices)
+router.route('/devices/:hubID')
+  .get(authController.isAuthenticated, deviceController.getDevices)
+router.route('/devices/:deviceID')
+  .get(authController.isAuthenticated, deviceController.getDevice)
+  .put(authController.isAuthenticated, deviceController.putDevice)
+  .delete(authController.isAuthenticated, deviceController.deleteDevice)
+
+// Register all routes with /api
 app.use('/api', router)
 
-// Start the server
-app.listen(port)
-console.log('Server started on port: ' + port)
+/**
+ * Start Express server.
+ */
+app.listen(port, () => {
+  console.log('%s Server is running at http://localhost:%d in %s mode', chalk.green('✓'), port, app.get('env')) 
+  console.log('  Press CTRL-C to stop\n')
+})
