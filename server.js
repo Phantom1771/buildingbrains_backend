@@ -15,9 +15,13 @@ dotenv.load({ path: '.env' })
 const authController = require('./controllers/auth')
 const clientController = require('./controllers/client')
 const oauth2Controller = require('./controllers/oauth2')
+
 const userController = require('./controllers/user')
 const hubController = require('./controllers/hub')
 const deviceController = require('./controllers/device')
+const groupController = require('./controllers/group')
+const automationController = require('./controllers/automation')
+const updateController = require('./controllers/update')
 
 
 // Connect to the buildingbrainsV2 MongoDB
@@ -89,6 +93,30 @@ router.route('/devices/:deviceID')
   .get(authController.isAuthenticated, deviceController.getDevice)
   .put(authController.isAuthenticated, deviceController.putDevice)
   .delete(authController.isAuthenticated, deviceController.deleteDevice)
+
+// Group Routes
+router.route('/groups/:hubID')
+  .post(authController.isAuthenticated, groupController.postGroup)
+  .get(authController.isAuthenticated, groupController.getGroups)
+  .delete(authController.isAuthenticated, groupController.deleteGroup)
+router.route('/groups/:groupID')
+  .get(authController.isAuthenticated, groupController.getGroup)
+  .put(authController.isAuthenticated, groupController.putDevice)
+  .delete(authController.isAuthenticated, groupController.deleteDevice)
+
+// Automation Routes
+router.route('/automations/:hubID')
+  .post(authController.isAuthenticated, automationController.postAutomation)
+  .get(authController.isAuthenticated, automationController.getAutomations)
+  .delete(authController.isAuthenticated, automationController.deleteAutomation)
+router.route('/automations/:automationID')
+  .get(authController.isAuthenticated, automationController.getAutomation)
+  .put(authController.isAuthenticated, automationController.putDevice)
+  .delete(authController.isAuthenticated, automationController.deleteDevice)
+
+// Update Routes
+router.route('/updates/:hubCode')
+  .get(updateController.getUpdates)
 
 // Register all routes with /api
 app.use('/api', router)

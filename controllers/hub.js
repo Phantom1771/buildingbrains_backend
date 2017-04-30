@@ -21,7 +21,7 @@ exports.postHub = function(req,res){
   })
   hub.save(function(err) {
     if (err){
-      res.status(400).json({message: 'Hub already registered'})
+      res.status(208).json({message: 'Hub already registered'})
       return
     }
     res.status(200).json({ message: 'Hub added!', object: hub })

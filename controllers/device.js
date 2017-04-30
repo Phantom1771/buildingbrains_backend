@@ -45,7 +45,7 @@ exports.postDevice = function(req,res){
 
       device.save((err) => {
         if (err) {
-          res.status(400).json({message:'Device already exists'})
+          res.status(208).json({message:'Device already exists'})
           return
         }
         res.status(200).json({message:'Device registered', object: device})
