@@ -54,11 +54,11 @@ exports.postGroup = function(req,res){
 exports.getGroups = function(req,res){
   Group.find({ hub: req.params.hubID}, (err, existingGroups) => {
     if (err) {
-      res.status(400).json({message: "Hub not found"})
+      res.status(400).json({message: "Group not found"})
       return
     }
     if (existingGroups){
-      res.json({message: "", objects: existingGroups})
+      res.json({message: 'Group Retrieved', objects: existingGroups})
       return
     }
   })
@@ -162,8 +162,8 @@ exports.putDevice = function(req,res){
 
 /*
  * DELETE /api/groups/:groupID
- * Delete a group
- * JSON Req: {groupID: String}
+ * Delete a device
+ * JSON Req: {deviceID: String}
  * 200 Res: {message: String, object: Device}
  * 400 Res: {message: String}
  */

@@ -158,7 +158,7 @@ exports.getDevice = function(req,res){
     }
 
     if (existingDevices){
-      res.status(200).json({message:'Claimed devices retrieved', object: existingDevice})
+      res.status(200).json({message:'Device retrieved', object: existingDevice})
       return
     }
   })

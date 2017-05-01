@@ -86,7 +86,7 @@ exports.putHub = function(req,res){
           existingUser.save()
           existingHub.save()
 
-          res.status(200).json({message: 'Hub added to User', hub: existingHub})
+          res.status(200).json({message: 'Hub added to User', object: existingHub})
           return
         }
       })

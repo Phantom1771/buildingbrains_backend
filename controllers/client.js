@@ -11,11 +11,11 @@ exports.postClients = function(req,res){
 
   client.save(function(err) {
     if (err){
-      res.send(err)
+      res.status(400).json({message:err})
       return
     }
 
-    res.json({ message: 'Client added!', data: client })
+    res.json({ message: 'Client added!', object: client })
     return
   })
 }
@@ -25,11 +25,11 @@ exports.getClients = function(req, res) {
   // Use the Client model to find all clients
   Client.find({ userID: req.user._id }, function(err, clients) {
     if (err){
-      res.send(err)
+      res.status(400).json({message:err})
       return
     }
 
-    res.json(clients)
+    res.json({message: 'Clients retrieved', objects:clients})
     return
   })
 }
