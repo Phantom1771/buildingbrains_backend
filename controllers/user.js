@@ -77,7 +77,7 @@ exports.getUsers = function(req, res) {
 /*
  * PUT /api/users/account
  * Update user information
- * JSON Req: {password: String, firstName: String, lastName: String}
+ * JSON Req: {oldPassword: String, newPassword: String, firstName: String, lastName: String}
  * 200 Res: {message: String, objects: Users}
  * 400 Res: {message: String}
  */
@@ -90,12 +90,16 @@ exports.putUser = function(req, res) {
 
     if(existingUser){
       console.log(existingUser)
-      existingUser.password = req.body.password
       existingUser.firstName = req.body.firstName
       existingUser.lastName = req.body.lastName
 
-      if(req.body.password && !existingUser.tempPassword){
+      if(req.body.newPassword && !existingUser.tempPassword){
         existingUser.tempPassword = false;
+        existingUser.password = req.body.newPassword
+      }
+
+      if(req.body.oldPassword.verifyPassword){
+        existingUser.password = req.body.newPassword
       }
 
       existingUser.save(function(err) {
